@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EAClique Portal
 
-## Getting Started
+Portal de notícias automatizado com IA e links de afiliados Amazon.
 
-First, run the development server:
+## 🚀 Tecnologias
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Frontend**: Next.js 14 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS 4
+- **Database**: Supabase (PostgreSQL)
+- **AI**: Ollama (Llama 3.1)
+- **Backend**: Python 3.12
+- **Icons**: Lucide React
+
+## 📁 Estrutura do Projeto
+
+```
+eaclique-portal/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx              # Homepage
+│   │   ├── noticia/[slug]/       # Página de detalhes da notícia
+│   │   └── category/[categoria]/ # Páginas de categoria
+│   ├── components/
+│   │   ├── AmazonProductCard.tsx # Card de produto afiliado
+│   │   ├── ShareBar.tsx          # Barra de compartilhamento
+│   │   ├── NewsSidebar.tsx       # Sidebar com widgets
+│   │   └── ads/                  # Componentes de anúncios
+│   └── lib/
+│       └── supabase.ts           # Cliente Supabase
+└── scripts/
+    ├── roboportal.py             # Robô de notícias V5.0
+    └── fix_supabase.sql          # Script SQL
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🤖 Roboportal V5.0
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Sistema automatizado que:
+- Lê feeds RSS de múltiplas fontes
+- Usa IA (Llama 3.1) para reescrever notícias
+- Sugere produtos Amazon contextuais
+- Gera links de afiliado automaticamente
+- Publica no Supabase 24/7
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎨 Features
 
-## Learn More
+### Página de Notícia
+- Layout 3 colunas (Desktop) / 1 coluna (Mobile)
+- Barra de compartilhamento (WhatsApp, Twitter, LinkedIn)
+- Injeção inteligente de anúncios (a cada 3 parágrafos)
+- Card de produto Amazon contextual
+- SEO otimizado para Google e redes sociais
+- Sidebar com "Últimas Notícias" e "Mais Lidas"
 
-To learn more about Next.js, take a look at the following resources:
+### Páginas de Categoria
+- Filtro por categoria (Plantão, Arena, Holofote, etc.)
+- Grid responsivo de notícias
+- Badges coloridos por categoria
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔧 Instalação
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone o repositório:
+```bash
+git clone https://github.com/timauk27/eaclique.git
+cd eaclique
+```
 
-## Deploy on Vercel
+2. Instale as dependências:
+```bash
+npm install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Configure as variáveis de ambiente (`.env.local`):
+```env
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Execute o projeto:
+```bash
+npm run dev
+```
+
+Acesse: http://localhost:3000
+
+## 🤖 Roboportal
+
+1. Instale as dependências Python:
+```bash
+pip install feedparser beautifulsoup4 supabase ollama colorama
+```
+
+2. Inicie o Ollama:
+```bash
+ollama serve
+```
+
+3. Execute o roboportal:
+```bash
+python scripts/roboportal.py
+```
+
+## 📊 Monetização
+
+- **Amazon Afiliados**: Links contextuais gerados por IA
+- **Display Ads**: Placeholders para Adsterra/Google AdSense
+
+## 🚀 Deploy
+
+### Vercel (Recomendado)
+```bash
+vercel --prod
+```
+
+### Outras Plataformas
+- Netlify
+- Railway
+- Render
+
+## 📝 Licença
+
+MIT
+
+## 👤 Autor
+
+**timauk27**
+- GitHub: [@timauk27](https://github.com/timauk27)

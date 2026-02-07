@@ -10,6 +10,30 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Editorial Colors */
+  --color-plantao: #dc2626;
+  --color-arena: #16a34a;
+  --color-holofote: #db2777;
+  --color-mercado: #ca8a04;
+  --color-pixel: #0891b2;
+  --color-play: #581c87;
+  --color-motor: #ea580c;
+  --color-vital: #0d9488;
+}
+
+@utility animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 @media (prefers-color-scheme: dark) {

@@ -9,6 +9,7 @@ import AdBillboard from '@/components/ads/AdBillboard'
 import AdSkyscraper from '@/components/ads/AdSkyscraper'
 import AdStickyFooter from '@/components/ads/AdStickyFooter'
 import NewsSidebar from '@/components/NewsSidebar'
+import { NewsArticleSchema, BreadcrumbSchema } from '@/components/seo/StructuredData'
 import { ChevronRight, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 
@@ -62,6 +63,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
         title: `${news.titulo_viral} - EAClique`,
         description: news.resumo_seo || news.titulo_viral,
+        alternates: {
+            canonical: newsUrl,
+        },
         openGraph: {
             title: news.titulo_viral,
             description: news.resumo_seo || news.titulo_viral,
@@ -78,6 +82,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             locale: 'pt_BR',
             type: 'article',
             publishedTime: news.created_at,
+            modifiedTime: news.updated_at || news.created_at,
         },
         twitter: {
             card: 'summary_large_image',
@@ -188,6 +193,25 @@ export default async function NewsPage({ params }: PageProps) {
 
     return (
         <>
+            {/* Schema.org Structured Data */}
+            <NewsArticleSchema
+                title={news.titulo_viral}
+                description={news.resumo_seo || news.titulo_viral}
+                imageUrl={news.imagem_capa}
+                imageAlt={news.imagem_alt}
+                datePublished={news.created_at}
+                dateModified={news.updated_at}
+                category={news.categoria}
+                slug={news.slug}
+            />
+            <BreadcrumbSchema
+                items={[
+                    { name: 'Home', url: '/' },
+                    { name: news.categoria, url: `/categoria/${news.categoria.toLowerCase()}` },
+                    { name: news.titulo_viral, url: `/noticia/${news.slug}` }
+                ]}
+            />
+
             <AdStickyFooter />
 
             <div className="min-h-screen bg-white dark:bg-slate-950">

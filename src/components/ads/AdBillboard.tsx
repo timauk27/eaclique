@@ -1,10 +1,32 @@
+'use client';
+
+import { useAdConfig, generateAdsterraCode } from '@/hooks/useAdConfig';
+
 export default function AdBillboard() {
+    const adConfig = useAdConfig('billboard');
+
+    if (!adConfig) {
+        return null; // Ad is disabled in config
+    }
+
+    const adsterraCode = generateAdsterraCode(adConfig);
+
     return (
-        <div className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-center h-64 my-6">
-            <div className="text-center text-slate-400">
-                <p className="text-sm font-medium">PUBLICIDADE</p>
-                <p className="text-xs mt-1">970x250 Billboard</p>
+        <div className="w-full flex justify-center my-4">
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden" style={{ maxWidth: '728px' }}>
+                <div className="text-xs text-slate-400 text-center py-1 border-b border-slate-200 dark:border-slate-700">
+                    PUBLICIDADE
+                </div>
+                <iframe
+                    srcDoc={adsterraCode}
+                    width="728"
+                    height="90"
+                    frameBorder="0"
+                    scrolling="no"
+                    style={{ maxWidth: '100%', border: 'none', display: 'block' }}
+                    title="Advertisement"
+                />
             </div>
         </div>
-    )
+    );
 }

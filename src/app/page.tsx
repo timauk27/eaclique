@@ -1,7 +1,32 @@
 import { createClient } from "@/utils/supabase/server";
 import { FeatureCard, CompactCard, TextCard } from "@/components/Card";
-import { SectionHeader, AdPlaceholder } from "@/components/Structure";
+import { SectionHeader } from "@/components/Structure";
 import { Clock, TrendingUp } from "lucide-react";
+import { Metadata } from 'next';
+import Link from 'next/link';
+import AdBillboard from '@/components/ads/AdBillboard';
+import AdSkyscraper from '@/components/ads/AdSkyscraper';
+
+export const metadata: Metadata = {
+  title: 'EAClique - Portal de Notícias',
+  description: 'Portal de notícias com informações sobre tecnologia, economia, mundo, entretenimento e muito mais. Fique por dentro das últimas notícias.',
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br',
+  },
+  openGraph: {
+    title: 'EAClique - Portal de Notícias',
+    description: 'Fique por dentro das últimas notícias de tecnologia, economia, mundo, entretenimento e muito mais.',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br',
+    siteName: 'EAClique',
+    locale: 'pt_BR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'EAClique - Portal de Notícias',
+    description: 'Fique por dentro das últimas notícias de tecnologia, economia, mundo, entretenimento e muito mais.',
+  },
+};
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -11,7 +36,7 @@ async function getData() {
     .from("Noticias")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(100); // Increased from 20 to 100 to have more content
 
   return posts || [];
 }
@@ -19,9 +44,10 @@ async function getData() {
 export default async function Home() {
   const posts = await getData();
 
-  // Simulated Categories (since we might not have enough specific data yet, filtering logically)
-  const arenaPosts = posts.filter(p => p.categoria?.toLowerCase() === 'arena' || p.slug.includes('futebol') || p.slug.includes('esporte')).slice(0, 4);
-  const holofotePosts = posts.filter(p => p.categoria?.toLowerCase() === 'holofote' || p.slug.includes('famosos') || p.slug.includes('bbb')).slice(0, 5);
+  // Filter by actual database categories
+  const arenaPosts = posts.filter(p => p.categoria?.toUpperCase() === 'ESPORTES' || p.categoria?.toUpperCase() === 'ARENA').slice(0, 4);
+  const holofotePosts = posts.filter(p => p.categoria?.toUpperCase() === 'HOLOFOTE' || p.categoria?.toUpperCase() === 'FAMOSOS' || p.categoria?.toUpperCase() === 'CINEMA').slice(0, 9);
+  const techPosts = posts.filter(p => p.categoria?.toUpperCase() === 'TECH' || p.categoria?.toUpperCase() === 'PIXEL').slice(0, 4);
   const mainPosts = posts.slice(0, 5);
 
   // Fallback if filters are empty (mocking for density)
@@ -51,7 +77,7 @@ export default async function Home() {
 
           {/* RIGHT: Sidebar (4 cols) */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <AdPlaceholder format="rectangle" label="Publicidade Topo" />
+            <AdBillboard />
             <div className="flex flex-col gap-0 border-t-2 border-gra-900">
               <h3 className="font-bold uppercase text-xs tracking-widest text-red-600 mb-2 mt-1">Mais Lidas</h3>
               {sidePosts.map((post, idx) => (
@@ -96,6 +122,37 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* BANNER HORIZONTAL */}
+        <section className="mb-12">
+          <AdBillboard />
+        </section>
+
+        {/* PIXEL/TECH SECTION */}
+        <section className="mb-12 bg-cyan-50/50 p-6 -mx-4 md:mx-0 rounded-xl border border-cyan-100">
+          <SectionHeader title="Pixel & Tecnologia" color="pixel" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {techPosts.length > 0 ? techPosts.map((post, idx) => (
+              <div key={idx} className={idx === 0 ? "md:col-span-2" : ""}>
+                {idx === 0 ? (
+                  <FeatureCard
+                    slug={post.slug}
+                    category="Pixel" categoryColor="pixel"
+                    title={post.titulo_viral} image={post.imagem_capa}
+                    size="small"
+                  />
+                ) : (
+                  <TextCard
+                    slug={post.slug}
+                    category="Tech" categoryColor="pixel"
+                    title={post.titulo_viral} time="2h atrás"
+                  />
+                )}
+              </div>
+            )) : (
+              <div className="col-span-4 text-center py-10 text-gray-400">Sem notícias de tecnologia no momento.</div>
+            )}
+          </div>
+        </section>
 
         {/* GRID COMPLEXO (Holofote + Sidebar Sticky) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
@@ -108,15 +165,15 @@ export default async function Home() {
               <SectionHeader title="Holofote & Famosos" color="holofote" />
               <div className="grid grid-cols-2 md:grid-cols-3 gap-1">
                 {holofotePosts.map((post, idx) => (
-                  <div key={idx} className="aspect-square relative group overflow-hidden bg-gray-200">
+                  <Link key={idx} href={`/noticia/${post.slug}`} className="aspect-square relative group overflow-hidden bg-gray-200 block">
                     {post.imagem_capa && (
-                      <img src={post.imagem_capa} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      <img src={post.imagem_capa} alt={post.titulo_viral} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     )}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3">
                       <span className="text-[10px] font-bold text-pink-500 bg-black/50 px-1 rounded uppercase mb-1 inline-block">Fama</span>
                       <p className="text-white text-xs font-bold leading-tight line-clamp-2">{post.titulo_viral}</p>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -143,7 +200,7 @@ export default async function Home() {
           {/* STICKY SIDEBAR (4 cols) */}
           <div className="lg:col-span-4 hidden lg:block">
             <div className="sticky top-24 space-y-8">
-              <AdPlaceholder format="skyscraper" label="Publicidade Lateral" />
+              <AdSkyscraper />
 
               <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
                 <div className="flex items-center gap-2 mb-4 text-purple-900 border-b border-purple-100 pb-2">

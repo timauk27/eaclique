@@ -1,0 +1,38 @@
+{
+  "billboard": {
+    "network": "adsterra",
+    "active": true,
+    "position": "top-banner",
+    "format": "728x90",
+    "description": "Banner horizontal topo (Desktop)",
+    "key": "ad80144040dc1bf67996553ea5bf90a2",
+    "renderType": "iframe"
+  },
+  "skyscraper": {
+    "network": "adsterra",
+    "active": true,
+    "position": "sidebar",
+    "format": "160x600",
+    "description": "Banner vertical lateral (Desktop)",
+    "key": "ad80144040dc1bf67996553ea5bf90a2",
+    "renderType": "iframe"
+  },
+  "in_article": {
+    "network": "adsterra",
+    "active": true,
+    "position": "in-content",
+    "format": "300x250",
+    "description": "Banner dentro do artigo (Desktop/Mobile)",
+    "key": "ad80144040dc1bf67996553ea5bf90a2",
+    "renderType": "iframe"
+  },
+  "sticky_footer": {
+    "network": "adsterra",
+    "active": true,
+    "position": "bottom-sticky",
+    "format": "320x50",
+    "description": "Banner fixo inferior (Mobile apenas)",
+    "key": "ad80144040dc1bf67996553ea5bf90a2",
+    "renderType": "iframe"
+  }
+}

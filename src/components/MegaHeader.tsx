@@ -21,25 +21,11 @@ export function MegaHeader() {
 
             {/* MAIN BAR */}
             <div className="bg-white py-4 border-b border-gray-200 sticky top-0 z-40 shadow-sm relative">
-                <div className="container mx-auto px-4 flex items-center justify-between">
+                <div className="container mx-auto px-4 flex items-center justify-center">
                     <Link href="/" className="text-4xl md:text-5xl font-black tracking-tighter uppercase flex items-center gap-1 hover:opacity-90 transition-opacity">
                         <span className="text-blue-700">EA</span>
                         <span className="font-light text-gray-900">Clique</span>
                     </Link>
-
-                    <div className="hidden md:flex relative w-96 items-center">
-                        <input
-                            type="text"
-                            placeholder="Buscar notícia..."
-                            className="w-full bg-gray-100 border-0 rounded-full px-5 py-2.5 text-sm focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-gray-400 font-medium"
-                        />
-                        <Search className="w-4 h-4 absolute right-4 text-gray-500" />
-                    </div>
-
-                    <button className="flex items-center gap-2 text-sm font-bold bg-gray-900 text-white px-5 py-2 rounded-full hover:bg-gray-800 transition-colors">
-                        <User className="w-4 h-4" />
-                        Entrar
-                    </button>
                 </div>
             </div>
 

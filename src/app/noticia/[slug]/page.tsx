@@ -1,3 +1,4 @@
+import React from 'react'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -97,7 +98,7 @@ function parseContentWithAds(
     const paragraphRegex = /<p[^>]*>.*?<\/p>/gs
     const paragraphs = htmlContent.match(paragraphRegex) || []
 
-    const elements: JSX.Element[] = []
+    const elements: React.ReactElement[] = []
     let paragraphCount = 0
     let amazonCardInserted = false
 

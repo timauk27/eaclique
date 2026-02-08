@@ -30,13 +30,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: route === '' ? 1.0 : 0.9,
     }))
 
-    // Notícias
-    const newsRoutes = noticias?.map((noticia) => ({
-        url: `${SITE_URL}/noticia/${noticia.slug}`,
-        lastModified: noticia.created_at,
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-    })) || []
+    // Notícias (filtra slugs nulos)
+    const newsRoutes = noticias
+        ?.filter((noticia) => noticia.slug && noticia.slug !== 'null')
+        ?.map((noticia) => ({
+            url: `${SITE_URL}/noticia/${noticia.slug}`,
+            lastModified: noticia.created_at,
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+        })) || []
 
     return [...routes, ...newsRoutes]
 }

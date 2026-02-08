@@ -97,7 +97,7 @@ export default async function Home() {
 
         {/* ARENA STRIP */}
         <section className="mb-12 bg-green-50/50 p-6 -mx-4 md:mx-0 rounded-xl border border-green-100">
-          <SectionHeader title="Arena Esportiva" color="arena" />
+          <SectionHeader title="Arena Esportiva" color="arena" categoryLink="/category/esportes" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {arenaPosts.length > 0 ? arenaPosts.map((post, idx) => (
               <div key={idx} className={idx === 0 ? "md:col-span-2" : ""}>
@@ -129,7 +129,7 @@ export default async function Home() {
 
         {/* PIXEL/TECH SECTION */}
         <section className="mb-12 bg-cyan-50/50 p-6 -mx-4 md:mx-0 rounded-xl border border-cyan-100">
-          <SectionHeader title="Pixel & Tecnologia" color="pixel" />
+          <SectionHeader title="Pixel & Tecnologia" color="pixel" categoryLink="/category/tech" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {techPosts.length > 0 ? techPosts.map((post, idx) => (
               <div key={idx} className={idx === 0 ? "md:col-span-2" : ""}>
@@ -162,7 +162,7 @@ export default async function Home() {
 
             {/* HOLOFOTE Grid */}
             <div className="mb-10">
-              <SectionHeader title="Holofote & Famosos" color="holofote" />
+              <SectionHeader title="Holofote & Famosos" color="holofote" categoryLink="/category/holofote" />
               <div className="grid grid-cols-2 md:grid-cols-3 gap-1">
                 {holofotePosts.map((post, idx) => (
                   <Link key={idx} href={`/noticia/${post.slug}`} className="aspect-square relative group overflow-hidden bg-gray-200 block">

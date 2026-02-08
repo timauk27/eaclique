@@ -12,9 +12,9 @@
     "network": "adsterra",
     "active": true,
     "position": "sidebar",
-    "format": "160x600",
+    "format": "160x300",
     "description": "Banner vertical lateral (Desktop)",
-    "key": "ad80144040dc1bf67996553ea5bf90a2",
+    "key": "0b7247496c5112256afc09731f773dc4",
     "renderType": "iframe"
   },
   "in_article": {

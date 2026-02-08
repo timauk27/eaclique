@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { Calendar, TrendingUp } from 'lucide-react'
+import AdBillboard from '@/components/ads/AdBillboard'
 
 interface PageProps {
     params: Promise<{ categoria: string }>
@@ -34,6 +35,7 @@ const categoryMap: Record<string, string> = {
     'dinheiro': 'ECONOMIA',
     'saude': 'SAUDE',
     'ciencia': 'CIENCIA',
+    'ciência': 'CIENCIA',
     'esportes': 'ESPORTES',
     'famosos': 'FAMOSOS',
     'motor': 'MOTOR',
@@ -162,52 +164,73 @@ export default async function CategoryPage({ params }: PageProps) {
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {news.map((article) => (
-                            <Link
-                                key={article.slug}
-                                href={`/noticia/${article.slug}`}
-                                className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200"
-                            >
-                                {/* Image */}
-                                {article.imagem_capa && (
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img
-                                            src={article.imagem_capa}
-                                            alt={article.imagem_alt || article.titulo_viral}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                        <div className={`absolute top-3 left-3 px-2 py-1 text-xs font-bold uppercase text-white rounded ${categoryColor}`}>
-                                            {article.categoria}
+                    <div className="space-y-8">
+                        {(() => {
+                            const elements = [];
+                            for (let i = 0; i < news.length; i += 6) {
+                                // Add a batch of up to 6 news items
+                                const batch = news.slice(i, i + 6);
+                                elements.push(
+                                    <div key={`batch-${i}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {batch.map((article) => (
+                                            <Link
+                                                key={article.slug}
+                                                href={`/noticia/${article.slug}`}
+                                                className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200"
+                                            >
+                                                {/* Image */}
+                                                {article.imagem_capa && (
+                                                    <div className="relative h-48 overflow-hidden">
+                                                        <img
+                                                            src={article.imagem_capa}
+                                                            alt={article.imagem_alt || article.titulo_viral}
+                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                        />
+                                                        <div className={`absolute top-3 left-3 px-2 py-1 text-xs font-bold uppercase text-white rounded ${categoryColor}`}>
+                                                            {article.categoria}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Content */}
+                                                <div className="p-5">
+                                                    <h2 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                                        {article.titulo_viral}
+                                                    </h2>
+
+                                                    {article.resumo_seo && (
+                                                        <p className="text-sm text-slate-600 mb-3 line-clamp-2">
+                                                            {article.resumo_seo}
+                                                        </p>
+                                                    )}
+
+                                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                                        <Calendar className="h-3 w-3" />
+                                                        <time dateTime={article.created_at}>
+                                                            {new Date(article.created_at).toLocaleDateString('pt-BR', {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            })}
+                                                        </time>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                );
+
+                                // Add banner after every 6 items (but not after the last batch)
+                                if (i + 6 < news.length) {
+                                    elements.push(
+                                        <div key={`ad-${i}`} className="w-full flex justify-center py-4">
+                                            <AdBillboard />
                                         </div>
-                                    </div>
-                                )}
-
-                                {/* Content */}
-                                <div className="p-5">
-                                    <h2 className="text-lg font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                                        {article.titulo_viral}
-                                    </h2>
-
-                                    {article.resumo_seo && (
-                                        <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                                            {article.resumo_seo}
-                                        </p>
-                                    )}
-
-                                    <div className="flex items-center gap-2 text-xs text-slate-500">
-                                        <Calendar className="h-3 w-3" />
-                                        <time dateTime={article.created_at}>
-                                            {new Date(article.created_at).toLocaleDateString('pt-BR', {
-                                                day: '2-digit',
-                                                month: 'short',
-                                                year: 'numeric',
-                                            })}
-                                        </time>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
+                                    );
+                                }
+                            }
+                            return elements;
+                        })()}
                     </div>
                 )}
             </div>

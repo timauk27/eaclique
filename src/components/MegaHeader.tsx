@@ -34,18 +34,18 @@ export function MegaHeader() {
                 <div className="container mx-auto px-4">
                     <ul className="flex justify-between items-center">
                         {[
-                            { name: "Plantão", color: "plantao" },
-                            { name: "Brasil", color: "plantao" }, // Using plantao red
-                            { name: "Mundo", color: "plantao" },
-                            { name: "Arena", color: "arena" },
-                            { name: "Holofote", color: "holofote" },
-                            { name: "Mercado", color: "mercado" },
-                            { name: "Pixel", color: "pixel" },
-                            { name: "Play", color: "play" },
-                            { name: "Vital", color: "vital" },
+                            { name: "Brasil", slug: "brasil", color: "plantao" },
+                            { name: "Mundo", slug: "mundo", color: "plantao" },
+                            { name: "Ciência", slug: "ciencia", color: "ciencia" },
+                            { name: "Arena", slug: "arena", color: "arena" },
+                            { name: "Holofote", slug: "holofote", color: "holofote" },
+                            { name: "Mercado", slug: "mercado", color: "mercado" },
+                            { name: "Pixel", slug: "pixel", color: "pixel" },
+                            { name: "Play", slug: "play", color: "play" },
+                            { name: "Vital", slug: "vital", color: "vital" },
                         ].map((cat) => (
                             <li key={cat.name} className="group relative py-3">
-                                <Link href={`/category/${cat.name.toLowerCase()}`} className={`text-sm font-black uppercase tracking-widest px-2 py-1 text-gray-600 transition-colors hover:text-[var(--color-${cat.color})]`}>
+                                <Link href={`/category/${cat.slug}`} className={`text-sm font-black uppercase tracking-widest px-2 py-1 text-gray-600 transition-colors hover:text-[var(--color-${cat.color})]`}>
                                     {cat.name}
                                 </Link>
                             </li>
@@ -53,21 +53,6 @@ export function MegaHeader() {
                     </ul>
                 </div>
             </nav>
-
-            {/* TICKER */}
-            <div className="bg-red-600 text-white py-2 overflow-hidden relative">
-                <div className="container mx-auto px-4 flex items-center">
-                    <span className="bg-white text-red-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest mr-4 animate-pulse rounded-sm shrink-0">
-                        URGENTE
-                    </span>
-                    <div className="whitespace-nowrap overflow-hidden flex-1">
-                        <div className="inline-block animate-marquee pl-[100%]">
-                            <span className="mx-4 font-bold text-sm">⚠️ Trânsito parado na Marginal Pinheiros após acidente grave.</span>
-                            <span className="mx-4 font-bold text-sm">🔥 Novo recorde de temperatura registrado no Rio de Janeiro.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </header>
     );
 }

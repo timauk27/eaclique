@@ -120,7 +120,7 @@ function parseContentWithAds(
                     <div
                         key={`before-${index}`}
                         dangerouslySetInnerHTML={{ __html: beforeContent }}
-                        className="prose prose-lg prose-slate dark:prose-invert max-w-none"
+                        className="prose prose-lg prose-slate max-w-none"
                     />
                 )
             }
@@ -131,7 +131,7 @@ function parseContentWithAds(
             <div
                 key={`p-${index}`}
                 dangerouslySetInnerHTML={{ __html: paragraph }}
-                className="prose prose-lg prose-slate dark:prose-invert max-w-none"
+                className="prose prose-lg prose-slate max-w-none"
             />
         )
 
@@ -164,7 +164,7 @@ function parseContentWithAds(
             <div
                 key="remaining"
                 dangerouslySetInnerHTML={{ __html: remainingContent }}
-                className="prose prose-lg prose-slate dark:prose-invert max-w-none"
+                className="prose prose-lg prose-slate max-w-none"
             />
         )
     }
@@ -214,22 +214,22 @@ export default async function NewsPage({ params }: PageProps) {
 
             <AdStickyFooter />
 
-            <div className="min-h-screen bg-white dark:bg-slate-950">
+            <div className="min-h-screen bg-white">
                 <div className="max-w-7xl mx-auto px-4 py-8">
                     {/* Billboard Ad */}
                     <AdBillboard />
 
                     {/* Breadcrumbs */}
-                    <nav className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-6">
-                        <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">
+                    <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6">
+                        <Link href="/" className="hover:text-blue-600">
                             Home
                         </Link>
                         <ChevronRight className="h-4 w-4" />
-                        <Link href={`/categoria/${news.categoria.toLowerCase()}`} className="hover:text-blue-600 dark:hover:text-blue-400">
+                        <Link href={`/categoria/${news.categoria.toLowerCase()}`} className="hover:text-blue-600">
                             {news.categoria}
                         </Link>
                         <ChevronRight className="h-4 w-4" />
-                        <span className="text-slate-900 dark:text-white truncate">
+                        <span className="text-slate-900 truncate">
                             {news.titulo_viral}
                         </span>
                     </nav>
@@ -251,19 +251,19 @@ export default async function NewsPage({ params }: PageProps) {
                             </div>
 
                             {/* Title */}
-                            <h1 className="text-4xl lg:text-5xl font-serif font-bold text-slate-900 dark:text-white leading-tight mb-4">
+                            <h1 className="text-4xl lg:text-5xl font-serif font-bold text-slate-900 leading-tight mb-4">
                                 {news.titulo_viral}
                             </h1>
 
                             {/* Subtitle/SEO Summary */}
                             {news.resumo_seo && (
-                                <p className="text-xl text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+                                <p className="text-xl text-slate-600 mb-6 leading-relaxed">
                                     {news.resumo_seo}
                                 </p>
                             )}
 
                             {/* Meta Info */}
-                            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-6 pb-6 border-b border-slate-200 dark:border-slate-800">
+                            <div className="flex items-center gap-4 text-sm text-slate-500 mb-6 pb-6 border-b border-slate-200">
                                 <div className="flex items-center gap-2">
                                     <Calendar className="h-4 w-4" />
                                     <time dateTime={news.created_at}>
@@ -289,7 +289,7 @@ export default async function NewsPage({ params }: PageProps) {
                                         className="w-full h-auto rounded-lg shadow-lg"
                                     />
                                     {news.imagem_alt && (
-                                        <figcaption className="text-sm text-slate-500 dark:text-slate-400 mt-2 text-center">
+                                        <figcaption className="text-sm text-slate-500 mt-2 text-center">
                                             {news.imagem_alt}
                                         </figcaption>
                                     )}
@@ -303,14 +303,14 @@ export default async function NewsPage({ params }: PageProps) {
 
                             {/* Source Attribution */}
                             {news.fonte_original && (
-                                <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                                <div className="mt-8 pt-6 border-t border-slate-200">
+                                    <p className="text-sm text-slate-500">
                                         Fonte original:{' '}
                                         <a
                                             href={news.fonte_original}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                                            className="text-blue-600 hover:underline"
                                         >
                                             {new URL(news.fonte_original).hostname}
                                         </a>

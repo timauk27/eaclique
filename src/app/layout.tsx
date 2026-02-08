@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   },
   description: 'Portal de notícias com informações sobre tecnologia, economia, mundo, entretenimento e muito mais.',
   keywords: ['notícias', 'brasil', 'tecnologia', 'economia', 'esportes', 'entretenimento', 'portal de notícias'],
+  alternates: {
+    types: {
+      'application/rss+xml': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br'}/feed.xml`,
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-export function SectionHeader({ title, color }: { title: string, color: string }) {
+export function SectionHeader({ title, color, categoryLink }: { title: string, color: string, categoryLink?: string }) {
     return (
         <div className="flex items-center justify-between border-b-2 border-gray-100 mb-6 pb-2" style={{ borderColor: `var(--color-${color})` }}>
             <div className="flex items-center gap-3">
@@ -9,9 +10,18 @@ export function SectionHeader({ title, color }: { title: string, color: string }
                     {title}
                 </h2>
             </div>
-            <button className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-gray-900 transition-colors">
-                Ver Tudo +
-            </button>
+            {categoryLink ? (
+                <Link
+                    href={categoryLink}
+                    className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-gray-900 transition-colors"
+                >
+                    Ver Tudo +
+                </Link>
+            ) : (
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-300">
+                    Ver Tudo +
+                </span>
+            )}
         </div>
     )
 }

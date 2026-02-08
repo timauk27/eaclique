@@ -36,6 +36,7 @@ export const metadata: Metadata = {
 
 import { MegaHeader } from "@/components/MegaHeader";
 import { Footer } from "@/components/Footer";
+import CookieBanner from "@/components/CookieBanner";
 
 export default function RootLayout({
   children,
@@ -57,6 +58,7 @@ export default function RootLayout({
         <MegaHeader />
         {children}
         <Footer />
+        <CookieBanner />
       </body>
     </html>
   );

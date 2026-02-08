@@ -1,256 +1,318 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Save, Power, AlertCircle, CheckCircle, Edit2, ExternalLink } from 'lucide-react';
-import adsConfigData from '@/config/ads.json';
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Plus, Edit, Trash2, Power, PowerOff, Save, X } from 'lucide-react'
 
-interface AdConfig {
-    network: string;
-    active: boolean;
-    position: string;
-    format: string;
-    key: string;
+interface Ad {
+    id: number
+    posicao: string
+    empresa: string
+    codigo_script: string
+    ativo: boolean
+    created_at: string
 }
 
-type AdPosition = 'billboard' | 'skyscraper' | 'in_article' | 'sticky_footer';
+const POSICOES_DISPONIVEIS = [
+    { value: 'sidebar_top', label: 'Sidebar Topo' },
+    { value: 'sidebar_bottom', label: 'Sidebar Rodapé' },
+    { value: 'in_article', label: 'Dentro do Artigo' },
+    { value: 'billboard', label: 'Billboard (Topo)' },
+    { value: 'footer_sticky', label: 'Footer Sticky (Mobile)' },
+    { value: 'skyscraper', label: 'Skyscraper (Lateral)' },
+]
 
-export default function AdManager() {
-    const [adsConfig, setAdsConfig] = useState<Record<AdPosition, AdConfig>>(
-        adsConfigData as Record<AdPosition, AdConfig>
-    );
-    const [editingPosition, setEditingPosition] = useState<AdPosition | null>(null);
-    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+export default function AdminAdsPage() {
+    const [ads, setAds] = useState<Ad[]>([])
+    const [loading, setLoading] = useState(true)
+    const [editingAd, setEditingAd] = useState<Ad | null>(null)
+    const [showForm, setShowForm] = useState(false)
 
-    const handleToggleActive = (position: AdPosition) => {
-        setAdsConfig(prev => ({
-            ...prev,
-            [position]: {
-                ...prev[position],
-                active: !prev[position].active
-            }
-        }));
-    };
+    // Form state
+    const [formData, setFormData] = useState({
+        posicao: '',
+        empresa: '',
+        codigo_script: ''
+    })
 
-    const handleUpdateConfig = (position: AdPosition, field: keyof AdConfig, value: string | boolean) => {
-        setAdsConfig(prev => ({
-            ...prev,
-            [position]: {
-                ...prev[position],
-                [field]: value
-            }
-        }));
-    };
+    // Carregar ads do banco
+    const loadAds = async () => {
+        setLoading(true)
+        const { data, error } = await supabase
+            .from('Config_Ads')
+            .select('*')
+            .order('created_at', { ascending: false })
 
-    const handleSaveConfig = async () => {
-        setSaveStatus('saving');
-
-        // Simulate API call to save config
-        // Em produção, você faria um POST para uma API route que escreve no ads.json
-        try {
-            const response = await fetch('/api/ads/config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(adsConfig)
-            });
-
-            if (response.ok) {
-                setSaveStatus('success');
-                setTimeout(() => setSaveStatus('idle'), 3000);
-            } else {
-                throw new Error('Failed to save');
-            }
-        } catch (error) {
-            setSaveStatus('error');
-            setTimeout(() => setSaveStatus('idle'), 3000);
+        if (!error && data) {
+            setAds(data)
         }
-    };
+        setLoading(false)
+    }
 
-    const positions: { key: AdPosition; name: string; description: string }[] = [
-        { key: 'billboard', name: 'Billboard', description: 'Banner topo 728x90' },
-        { key: 'skyscraper', name: 'Skyscraper', description: 'Banner lateral 160x600' },
-        { key: 'in_article', name: 'In-Article', description: 'Banner dentro do artigo 300x250' },
-        { key: 'sticky_footer', name: 'Sticky Footer', description: 'Banner fixo rodapé' },
-    ];
+    useEffect(() => {
+        loadAds()
+    }, [])
+
+    // Toggle ativo/inativo
+    const toggleAtivo = async (id: number, currentStatus: boolean) => {
+        const { error } = await supabase
+            .from('Config_Ads')
+            .update({ ativo: !currentStatus })
+            .eq('id', id)
+
+        if (!error) {
+            loadAds()
+        }
+    }
+
+    // Deletar ad
+    const deleteAd = async (id: number) => {
+        if (!confirm('Tem certeza que deseja deletar este anúncio?')) return
+
+        const { error } = await supabase
+            .from('Config_Ads')
+            .delete()
+            .eq('id', id)
+
+        if (!error) {
+            loadAds()
+        }
+    }
+
+    // Salvar (criar ou atualizar)
+    const saveAd = async () => {
+        if (!formData.posicao || !formData.empresa || !formData.codigo_script) {
+            alert('Preencha todos os campos!')
+            return
+        }
+
+        if (editingAd) {
+            // Update
+            const { error } = await supabase
+                .from('Config_Ads')
+                .update({
+                    posicao: formData.posicao,
+                    empresa: formData.empresa,
+                    codigo_script: formData.codigo_script,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', editingAd.id)
+
+            if (!error) {
+                resetForm()
+                loadAds()
+            }
+        } else {
+            // Insert
+            const { error } = await supabase
+                .from('Config_Ads')
+                .insert([{
+                    posicao: formData.posicao,
+                    empresa: formData.empresa,
+                    codigo_script: formData.codigo_script,
+                    ativo: true
+                }])
+
+            if (!error) {
+                resetForm()
+                loadAds()
+            }
+        }
+    }
+
+    const resetForm = () => {
+        setFormData({ posicao: '', empresa: '', codigo_script: '' })
+        setEditingAd(null)
+        setShowForm(false)
+    }
+
+    const startEdit = (ad: Ad) => {
+        setEditingAd(ad)
+        setFormData({
+            posicao: ad.posicao,
+            empresa: ad.empresa,
+            codigo_script: ad.codigo_script
+        })
+        setShowForm(true)
+    }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-            {/* Header */}
-            <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                                📢 Gerenciador de Anúncios
-                            </h1>
-                            <p className="text-gray-500 mt-1">Gerencie os códigos e status dos anúncios do site</p>
+        <div className="min-h-screen bg-gray-50 p-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Gerenciador de Anúncios</h1>
+                        <p className="text-gray-600 mt-1">
+                            Gerencie scripts de AdSense, Adsterra, 1win, MGID e outros
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setShowForm(true)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Novo Anúncio
+                    </button>
+                </div>
+
+                {/* Form Modal */}
+                {showForm && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                                <h2 className="text-2xl font-bold text-gray-900">
+                                    {editingAd ? 'Editar Anúncio' : 'Novo Anúncio'}
+                                </h2>
+                                <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <div className="p-6 space-y-4">
+                                {/* Posição */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Posição
+                                    </label>
+                                    <select
+                                        value={formData.posicao}
+                                        onChange={(e) => setFormData({ ...formData, posicao: e.target.value })}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                                    >
+                                        <option value="">Selecione uma posição</option>
+                                        {POSICOES_DISPONIVEIS.map((pos) => (
+                                            <option key={pos.value} value={pos.value}>
+                                                {pos.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Empresa */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Empresa/Rede
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.empresa}
+                                        onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
+                                        placeholder="Ex: AdSense, Adsterra, 1win, MGID"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                                    />
+                                </div>
+
+                                {/* Código do Script */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Código HTML/JavaScript
+                                    </label>
+                                    <textarea
+                                        value={formData.codigo_script}
+                                        onChange={(e) => setFormData({ ...formData, codigo_script: e.target.value })}
+                                        placeholder='Cole o código completo aqui. Ex: <script async src="..."></script>'
+                                        rows={12}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none font-mono text-sm"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        ⚠️ Cole EXATAMENTE como fornecido pela rede de anúncios
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
+                                <button
+                                    onClick={resetForm}
+                                    className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={saveAd}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
+                                >
+                                    <Save className="w-5 h-5" />
+                                    Salvar
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                )}
+
+                {/* Lista de Ads */}
+                {loading ? (
+                    <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+                        <p className="text-gray-500 mt-4">Carregando...</p>
+                    </div>
+                ) : ads.length === 0 ? (
+                    <div className="bg-white rounded-lg p-12 text-center">
+                        <p className="text-gray-500 text-lg">Nenhum anúncio cadastrado ainda.</p>
                         <button
-                            onClick={handleSaveConfig}
-                            disabled={saveStatus === 'saving'}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                            onClick={() => setShowForm(true)}
+                            className="mt-4 text-red-600 hover:underline"
                         >
-                            <Save className="w-5 h-5" />
-                            {saveStatus === 'saving' ? 'Salvando...' : 'Salvar Alterações'}
+                            Criar primeiro anúncio
                         </button>
                     </div>
-
-                    {/* Save Status */}
-                    {saveStatus === 'success' && (
-                        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            <p className="text-green-800 font-medium">Configurações salvas com sucesso!</p>
-                        </div>
-                    )}
-                    {saveStatus === 'error' && (
-                        <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-                            <AlertCircle className="w-5 h-5 text-red-600" />
-                            <p className="text-red-800 font-medium">Erro ao salvar. Tente novamente.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {positions.map(({ key, name, description }) => {
-                        const config = adsConfig[key];
-                        const isEditing = editingPosition === key;
-
-                        return (
+                ) : (
+                    <div className="grid gap-4">
+                        {ads.map((ad) => (
                             <div
-                                key={key}
-                                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                                key={ad.id}
+                                className={`bg-white rounded-lg p-6 border-2 ${ad.ativo ? 'border-green-500' : 'border-gray-200'
+                                    } transition`}
                             >
-                                {/* Card Header */}
-                                <div className={`p-6 border-b ${config.active ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                                {name}
-                                                {config.active && (
-                                                    <span className="text-xs bg-green-600 text-white px-2 py-1 rounded-full">ATIVO</span>
-                                                )}
-                                                {!config.active && (
-                                                    <span className="text-xs bg-gray-400 text-white px-2 py-1 rounded-full">INATIVO</span>
-                                                )}
-                                            </h3>
-                                            <p className="text-sm text-gray-600 mt-1">{description}</p>
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${ad.ativo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                                                }`}>
+                                                {ad.ativo ? '● ATIVO' : '○ INATIVO'}
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-600">
+                                                {POSICOES_DISPONIVEIS.find(p => p.value === ad.posicao)?.label || ad.posicao}
+                                            </span>
                                         </div>
+                                        <h3 className="text-xl font-bold text-gray-900 mb-2">{ad.empresa}</h3>
+                                        <pre className="bg-gray-50 p-3 rounded text-xs text-gray-600 overflow-x-auto max-h-32">
+                                            {ad.codigo_script.substring(0, 200)}...
+                                        </pre>
+                                    </div>
+
+                                    <div className="flex gap-2 ml-4">
                                         <button
-                                            onClick={() => handleToggleActive(key)}
-                                            className={`p-2 rounded-lg transition-colors ${config.active
-                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                    : 'bg-gray-300 hover:bg-gray-400 text-gray-700'
+                                            onClick={() => toggleAtivo(ad.id, ad.ativo)}
+                                            className={`p-2 rounded-lg transition ${ad.ativo
+                                                    ? 'bg-green-100 hover:bg-green-200 text-green-700'
+                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-500'
                                                 }`}
-                                            title={config.active ? 'Desativar' : 'Ativar'}
+                                            title={ad.ativo ? 'Desativar' : 'Ativar'}
                                         >
-                                            <Power className="w-5 h-5" />
+                                            {ad.ativo ? <Power className="w-5 h-5" /> : <PowerOff className="w-5 h-5" />}
+                                        </button>
+                                        <button
+                                            onClick={() => startEdit(ad)}
+                                            className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition"
+                                            title="Editar"
+                                        >
+                                            <Edit className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => deleteAd(ad.id)}
+                                            className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition"
+                                            title="Deletar"
+                                        >
+                                            <Trash2 className="w-5 h-5" />
                                         </button>
                                     </div>
                                 </div>
-
-                                {/* Card Body */}
-                                <div className="p-6 space-y-4">
-                                    {/* Network */}
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Rede de Anúncios</label>
-                                        <select
-                                            value={config.network}
-                                            onChange={(e) => handleUpdateConfig(key, 'network', e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="adsterra">Adsterra</option>
-                                            <option value="google_adsense">Google AdSense</option>
-                                            <option value="outros">Outros</option>
-                                        </select>
-                                    </div>
-
-                                    {/* Position */}
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Posição</label>
-                                        <input
-                                            type="text"
-                                            value={config.position}
-                                            onChange={(e) => handleUpdateConfig(key, 'position', e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="ex: top-banner"
-                                        />
-                                    </div>
-
-                                    {/* Format */}
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">Formato</label>
-                                        <input
-                                            type="text"
-                                            value={config.format}
-                                            onChange={(e) => handleUpdateConfig(key, 'format', e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="ex: 728x90"
-                                        />
-                                    </div>
-
-                                    {/* Key */}
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                                            Chave do Anúncio (Key)
-                                            <button
-                                                onClick={() => setEditingPosition(isEditing ? null : key)}
-                                                className="text-blue-600 hover:text-blue-700"
-                                                title={isEditing ? 'Fechar editor' : 'Editar key'}
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                        </label>
-                                        {isEditing ? (
-                                            <textarea
-                                                value={config.key}
-                                                onChange={(e) => handleUpdateConfig(key, 'key', e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
-                                                rows={4}
-                                                placeholder="Cole aqui o código/key do anúncio"
-                                            />
-                                        ) : (
-                                            <div className="bg-gray-50 px-4 py-2 rounded-lg border border-gray-300">
-                                                <code className="text-sm text-gray-600 break-all">{config.key}</code>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Test Ad Button */}
-                                    <div className="pt-4 border-t border-gray-200">
-                                        <a
-                                            href={`https://www.${config.network === 'adsterra' ? 'adsterra.com' : 'google.com/adsense'}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-                                        >
-                                            <ExternalLink className="w-4 h-4" />
-                                            Abrir painel {config.network === 'adsterra' ? 'Adsterra' : 'AdSense'}
-                                        </a>
-                                    </div>
-                                </div>
                             </div>
-                        );
-                    })}
-                </div>
-
-                {/* Info Box */}
-                <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <div className="flex items-start gap-3">
-                        <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
-                        <div>
-                            <h3 className="font-bold text-blue-900 mb-2">Como usar:</h3>
-                            <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                                <li>Ative/desative anúncios clicando no botão de power</li>
-                                <li>Cole a key/código do anúncio no campo correspondente</li>
-                                <li>Clique em "Salvar Alterações" para aplicar</li>
-                                <li>As mudanças serão refletidas em todo o site automaticamente</li>
-                            </ul>
-                        </div>
+                        ))}
                     </div>
-                </div>
+                )}
             </div>
         </div>
-    );
+    )
 }

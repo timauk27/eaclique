@@ -9,6 +9,7 @@ import AdBillboard from '@/components/ads/AdBillboard'
 import AdSkyscraper from '@/components/ads/AdSkyscraper'
 import AdStickyFooter from '@/components/ads/AdStickyFooter'
 import NewsSidebar from '@/components/NewsSidebar'
+import RelatedArticles from '@/components/RelatedArticles'
 import { NewsArticleSchema, BreadcrumbSchema } from '@/components/seo/StructuredData'
 import { ChevronRight, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
@@ -317,6 +318,9 @@ export default async function NewsPage({ params }: PageProps) {
                                     </p>
                                 </div>
                             )}
+
+                            {/* Related Articles */}
+                            <RelatedArticles currentNewsId={news.id} currentCategory={news.categoria} />
                         </article>
 
                         {/* Right Column - Sidebar */}

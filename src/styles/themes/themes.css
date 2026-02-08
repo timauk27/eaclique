@@ -1,0 +1,159 @@
+/* 
+  TEMAS DO EACLIOUE
+  -----------------
+  Este arquivo centraliza a importação dos temas.
+*/
+
+/* 1. Base (Padrão) - Variáveis CSS Nativas */
+:root {
+  /* Cores de Fundo */
+  --bg-page: #ffffff;
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+  --bg-footer: #18181b;
+  /* zinc-900 */
+
+  /* Cores de Texto */
+  --text-primary: #171717;
+  /* nutral-900 */
+  --text-secondary: #52525b;
+  /* zinc-600 */
+  --text-inverted: #ffffff;
+
+  /* Cores de Acento */
+  --accent-color: #dc2626;
+  /* red-600 */
+  --accent-hover: #b91c1c;
+  /* red-700 */
+
+  /* Tipografia */
+  --font-heading: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* UI Elements */
+  --border-radius-global: 0.5rem;
+  /* rounded-lg */
+  --border-width-global: 1px;
+  --shadow-global: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --card-skew: 0deg;
+
+  /* Efeitos */
+  --texture-overlay: none;
+  --filter-image: none;
+}
+
+/* 2. Minecraft (Blocão) */
+.theme-minecraft {
+  --bg-page: #3a2e26;
+  /* Terra marrom */
+  --bg-card: #7F7F7F;
+  /* Pedra lisa */
+  --bg-header: #211812;
+  /* Terra escura */
+  --bg-footer: #000000;
+
+  --text-primary: #ffffff;
+  --text-secondary: #dddddd;
+  --text-inverted: #ffffff;
+
+  --accent-color: #5BC236;
+  /* Verde grama */
+  --accent-hover: #4aa32b;
+
+  --font-heading: var(--font-vt323), monospace;
+  --font-body: var(--font-vt323), monospace;
+
+  --border-radius-global: 0px;
+  --border-width-global: 3px;
+  --shadow-global: 4px 4px 0px #000000;
+  /* Sombra dura */
+
+  --texture-overlay: url("https://www.transparenttextures.com/patterns/cubes.png");
+}
+
+/* 3. Red Dead Redemption 2 (Old West) */
+.theme-rdr2 {
+  --bg-page: #e3dcd2;
+  /* Papel velho */
+  --bg-card: #fdfbf7;
+  /* Papel mais claro */
+  --bg-header: #3e2723;
+  /* Marrom couro */
+  --bg-footer: #1a110e;
+
+  --text-primary: #3E2723;
+  /* Sépia escuro */
+  --text-secondary: #5D4037;
+  --text-inverted: #e3dcd2;
+
+  --accent-color: #8B0000;
+  /* Vermelho sangue */
+  --accent-hover: #600000;
+
+  --font-heading: var(--font-rye), serif;
+  --font-body: var(--font-courier), monospace;
+
+  --border-radius-global: 2px;
+  --border-width-global: 1px;
+  --shadow-global: 2px 2px 5px rgba(62, 39, 35, 0.3);
+
+  --filter-image: sepia(0.6) contrast(1.2) brightness(0.9);
+  --texture-overlay: url("https://www.transparenttextures.com/patterns/aged-paper.png");
+}
+
+/* 4. Fortnite (Battle Royale) */
+.theme-fortnite {
+  --bg-page: #1a1a2e;
+  /* Azul escurão base */
+  --bg-card: rgba(22, 33, 62, 0.9);
+  /* Azul translúcido */
+  --bg-header: #0f3460;
+  --bg-footer: #16213e;
+
+  --text-primary: #ffffff;
+  --text-secondary: #eeeeee;
+  --text-inverted: #ffffff;
+
+  --accent-color: #FFD700;
+  /* Dourado Lendário */
+  --accent-hover: #e6c200;
+
+  --font-heading: var(--font-bangers), sans-serif;
+  /* Fallback */
+  --font-body: 'Arial', sans-serif;
+
+  --border-radius-global: 0px;
+  --border-width-global: 2px;
+  --shadow-global: 0 0 15px rgba(0, 191, 255, 0.5);
+  /* Glow azul */
+  --card-skew: -2deg;
+
+  --texture-overlay: linear-gradient(135deg, #4B0082 0%, #00BFFF 100%);
+}
+
+/* 5. Roblox (Moderno) */
+.theme-roblox {
+  --bg-page: #111111;
+  --bg-card: #232527;
+  --bg-header: #1e1f22;
+  --bg-footer: #111111;
+
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-inverted: #ffffff;
+
+  --accent-color: #E60000;
+  /* Vermelho Roblox */
+  --accent-hover: #cc0000;
+
+  --font-heading: var(--font-montserrat), sans-serif;
+  --font-body: var(--font-nunito), sans-serif;
+
+  --border-radius-global: 1.5rem;
+  /* GDC - Gordinho */
+  --border-width-global: 0px;
+  --shadow-global: 0 10px 25px rgba(0, 0, 0, 0.3);
+
+  --texture-overlay: radial-gradient(circle, #232527 10%, transparent 10%) 0 0/20px 20px;
+  /* Studs fake */
+}

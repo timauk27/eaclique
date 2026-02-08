@@ -74,7 +74,7 @@ async function getNewsByCategory(category: string) {
         .select('*')
         .ilike('categoria', category) // Case-insensitive match
         .order('created_at', { ascending: false })
-        .limit(20)
+        .limit(100)
 
     if (error) {
         console.error('Error fetching news:', error)

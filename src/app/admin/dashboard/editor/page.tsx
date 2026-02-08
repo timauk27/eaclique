@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Edit, Plus, Save, X, Trash2, ExternalLink } from 'lucide-react'
+import { Edit, Plus, Save, X, Trash2, ExternalLink, FileText, RefreshCw, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 
 interface Noticia {
@@ -21,6 +21,9 @@ export default function AdminEditorPage() {
     const [loading, setLoading] = useState(true)
     const [editingId, setEditingId] = useState<number | null>(null)
     const [showNewForm, setShowNewForm] = useState(false)
+    const [replacingImageId, setReplacingImageId] = useState<number | null>(null)
+    const [newImageUrl, setNewImageUrl] = useState('')
+    const [uploadingImage, setUploadingImage] = useState(false)
 
     // Form state
     const [formData, setFormData] = useState({
@@ -146,6 +149,37 @@ export default function AdminEditorPage() {
         })
         setEditingId(null)
         setShowNewForm(false)
+    }
+
+    const replaceImage = async (noticiaId: number) => {
+        if (!newImageUrl.trim()) {
+            alert('❌ Cole a URL da imagem!')
+            return
+        }
+
+        setUploadingImage(true)
+
+        try {
+            // Inserir pedido na fila para o robô processar
+            const { error } = await supabase
+                .from('Pedidos_Imagem')
+                .insert({
+                    noticia_id: noticiaId,
+                    url_sugerida: newImageUrl,
+                    status: 'pendente'
+                })
+
+            if (error) throw error
+
+            setReplacingImageId(null)
+            setNewImageUrl('')
+            alert('🤖 Pedido enviado pro robô!\n\nEle vai:\n1. Validar a imagem com IA\n2. Usar se for boa OU gerar nova\n3. Atualizar a notícia\n\nAguarde alguns segundos e recarregue a página.')
+        } catch (err: any) {
+            console.error('Erro ao criar pedido:', err)
+            alert(`❌ Erro: ${err.message}`)
+        } finally {
+            setUploadingImage(false)
+        }
     }
 
     return (
@@ -291,44 +325,78 @@ export default function AdminEditorPage() {
                         <div className="divide-y divide-gray-100">
                             {noticias.map((noticia) => (
                                 <div key={noticia.id} className="p-6 hover:bg-gray-50 transition">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                                                {noticia.titulo_viral}
-                                            </h3>
-                                            <div className="flex items-center gap-3 text-sm text-gray-500">
-                                                <span className="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">
-                                                    {noticia.categoria}
-                                                </span>
-                                                <span>
-                                                    {new Date(noticia.created_at).toLocaleString('pt-BR')}
-                                                </span>
-                                            </div>
+                                    <div className="flex items-start gap-4">
+                                        {/* Thumbnail da Imagem */}
+                                        <div className="flex-shrink-0">
+                                            {noticia.imagem_capa ? (
+                                                <img
+                                                    src={noticia.imagem_capa}
+                                                    alt={noticia.titulo_viral}
+                                                    className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none'
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="w-24 h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                                                    <FileText className="w-8 h-8 text-gray-400" />
+                                                </div>
+                                            )}
                                         </div>
 
-                                        <div className="flex gap-2">
-                                            <Link
-                                                href={`/noticia/${noticia.slug}`}
-                                                target="_blank"
-                                                className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
-                                                title="Ver no site"
-                                            >
-                                                <ExternalLink className="w-5 h-5" />
-                                            </Link>
-                                            <button
-                                                onClick={() => startEdit(noticia)}
-                                                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition"
-                                                title="Editar"
-                                            >
-                                                <Edit className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => deleteNoticia(noticia.id)}
-                                                className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition"
-                                                title="Deletar"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
+                                        {/* Conteúdo */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                                                        {noticia.titulo_viral}
+                                                    </h3>
+                                                    <div className="flex items-center gap-3 text-sm text-gray-500">
+                                                        <span className="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">
+                                                            {noticia.categoria}
+                                                        </span>
+                                                        <span>
+                                                            {new Date(noticia.created_at).toLocaleString('pt-BR')}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setReplacingImageId(noticia.id)
+                                                            setNewImageUrl('')
+                                                        }}
+                                                        className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition"
+                                                        title="Trocar Imagem"
+                                                    >
+                                                        <RefreshCw className="w-5 h-5" />
+                                                    </button>
+                                                    <Link
+                                                        href={`/noticia/${noticia.slug}`}
+                                                        target="_blank"
+                                                        className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition"
+                                                        title="Ver no site"
+                                                    >
+                                                        <ExternalLink className="w-5 h-5" />
+                                                    </Link>
+                                                    <button
+                                                        onClick={() => startEdit(noticia)}
+                                                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit className="w-5 h-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteNoticia(noticia.id)}
+                                                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition"
+                                                        title="Deletar"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -336,6 +404,66 @@ export default function AdminEditorPage() {
                         </div>
                     )}
                 </div>
+
+                {/* Modal de Trocar Imagem */}
+                {replacingImageId && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <ImageIcon className="w-6 h-6 text-purple-600" />
+                                    Trocar Imagem Automaticamente
+                                </h3>
+                                <button
+                                    onClick={() => {
+                                        setReplacingImageId(null)
+                                        setNewImageUrl('')
+                                    }}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Cole a URL da nova imagem:
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={newImageUrl}
+                                        onChange={(e) => setNewImageUrl(e.target.value)}
+                                        placeholder="https://i.ytimg.com/vi/..."
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+                                        disabled={uploadingImage}
+                                    />
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        💡 Funciona com YouTube, imagens diretas, etc.
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => replaceImage(replacingImageId)}
+                                    disabled={uploadingImage || !newImageUrl.trim()}
+                                    className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2"
+                                >
+                                    {uploadingImage ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Processando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <RefreshCw className="w-5 h-5" />
+                                            Trocar Imagem Agora
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -5,14 +5,14 @@ import { supabase } from '@/lib/supabase'
 export default async function NewsSidebar() {
     // Fetch latest news
     const { data: latestNews } = await supabase
-        .from('Noticias')
+        .from('noticias')
         .select('slug, titulo_viral, created_at, categoria')
         .order('created_at', { ascending: false })
         .limit(5)
 
     // Fetch most read news (using fake views for now)
     const { data: mostRead } = await supabase
-        .from('Noticias')
+        .from('noticias')
         .select('slug, titulo_viral, views_fake, categoria')
         .order('views_fake', { ascending: false })
         .limit(5)

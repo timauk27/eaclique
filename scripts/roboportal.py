@@ -49,7 +49,7 @@ def log(msg, type="INFO"):
 
 def check_duplicate(link):
     try:
-        response = supabase.table("Noticias").select("id").eq("fonte_original", link).execute()
+        response = supabase.table("noticias").select("id").eq("fonte_original", link).execute()
         return len(response.data) > 0
     except: return False
 

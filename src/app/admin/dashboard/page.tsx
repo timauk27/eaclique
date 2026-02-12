@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { TrendingUp, FileText, Image, DollarSign, Megaphone, Eye } from 'lucide-react'
+import { TrendingUp, FileText, Image, DollarSign, Megaphone, Eye, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AdminDashboardHome() {
@@ -21,24 +21,24 @@ export default function AdminDashboardHome() {
 
             // Total de notícias
             const { count: total } = await supabase
-                .from('Noticias')
+                .from('noticias')
                 .select('*', { count: 'exact', head: true })
 
             // Notícias de hoje
             const { count: hoje_count } = await supabase
-                .from('Noticias')
+                .from('noticias')
                 .select('*', { count: 'exact', head: true })
                 .gte('created_at', hoje.toISOString())
 
             // Notícias sem imagem ou resumo
             const { data: problematicas } = await supabase
-                .from('Noticias')
+                .from('noticias')
                 .select('id')
                 .or('imagem_capa.is.null,resumo_seo.is.null')
 
             // Views hoje
             const { data: viewsData } = await supabase
-                .from('Noticias')
+                .from('noticias')
                 .select('views_fake')
                 .gte('created_at', hoje.toISOString())
 
@@ -57,6 +57,12 @@ export default function AdminDashboardHome() {
     }, [])
 
     const quickActions = [
+        {
+            href: '/admin/dashboard/noticias',
+            label: 'Moderar News',
+            icon: CheckCircle,
+            color: 'bg-indigo-600 hover:bg-indigo-700'
+        },
         {
             href: '/admin/dashboard/editor',
             label: 'Criar Notícia',

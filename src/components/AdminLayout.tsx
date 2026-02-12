@@ -12,7 +12,8 @@ import {
     Megaphone,
     Menu,
     X,
-    Home
+    Home,
+    FileText
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -24,9 +25,11 @@ interface AdminLayoutProps {
 
 const menuItems = [
     { href: '/admin/dashboard', label: 'Visão Geral', icon: LayoutDashboard },
+    { href: '/admin/dashboard/noticias', label: 'Notícias', icon: FileText },
+    { href: '/admin/dashboard/categorias', label: 'Categorias', icon: FileText },
+    { href: '/admin/dashboard/editor', label: 'Editor', icon: Edit },
     { href: '/admin/dashboard/afiliados', label: 'Afiliados', icon: DollarSign },
     { href: '/admin/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
-    { href: '/admin/dashboard/editor', label: 'Editor', icon: Edit },
     { href: '/admin/dashboard/seo', label: 'SEO Check', icon: AlertTriangle },
     { href: '/admin/dashboard/ads', label: 'Anúncios', icon: Megaphone },
 ]

@@ -33,7 +33,7 @@ export const revalidate = 60; // Revalidate every minute
 async function getData() {
   const supabase = await createClient();
   const { data: posts } = await supabase
-    .from("Noticias")
+    .from("noticias")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(100); // Increased from 20 to 100 to have more content
@@ -46,7 +46,7 @@ export default async function Home() {
 
   // Filter by actual database categories
   const arenaPosts = posts.filter(p => p.categoria?.toUpperCase() === 'ESPORTES' || p.categoria?.toUpperCase() === 'ARENA').slice(0, 4);
-  const holofotePosts = posts.filter(p => p.categoria?.toUpperCase() === 'HOLOFOTE' || p.categoria?.toUpperCase() === 'FAMOSOS' || p.categoria?.toUpperCase() === 'CINEMA').slice(0, 9);
+  const holofotePosts = posts.filter(p => p.categoria?.toUpperCase() === 'HOLOFOTE' || p.categoria?.toUpperCase() === 'FAMOSOS' || p.categoria?.toUpperCase() === 'CINEMA' || p.categoria?.toUpperCase() === 'ENTRETENIMENTO' || p.categoria?.toUpperCase() === 'CELEBRIDADES' || p.categoria?.toUpperCase() === 'MODA' || p.categoria?.toUpperCase() === 'BELEZA' || p.categoria?.toUpperCase() === 'LIFESTYLE').slice(0, 9);
   const techPosts = posts.filter(p => p.categoria?.toUpperCase() === 'TECH' || p.categoria?.toUpperCase() === 'PIXEL').slice(0, 4);
   const mainPosts = posts.slice(0, 5);
 

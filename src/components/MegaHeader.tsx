@@ -32,20 +32,20 @@ export function MegaHeader() {
             {/* NAV BAR */}
             <nav className="bg-white border-b-2 border-gray-100 hidden md:block shadow-[0_2px_10px_rgba(0,0,0,0.05)] relative z-30">
                 <div className="container mx-auto px-4">
-                    <ul className="flex justify-between items-center">
+                    <ul className="flex justify-between items-center overflow-x-auto gap-4 py-2 scrollbar-none">
                         {[
-                            { name: "Brasil", slug: "brasil", color: "plantao" },
-                            { name: "Mundo", slug: "mundo", color: "plantao" },
-                            { name: "Ciência", slug: "ciencia", color: "ciencia" },
-                            { name: "Arena", slug: "arena", color: "arena" },
-                            { name: "Holofote", slug: "holofote", color: "holofote" },
-                            { name: "Mercado", slug: "mercado", color: "mercado" },
-                            { name: "Pixel", slug: "pixel", color: "pixel" },
-                            { name: "Play", slug: "play", color: "play" },
-                            { name: "Vital", slug: "vital", color: "vital" },
+                            { name: "Brasil", slug: "BRASIL", color: "plantao" },
+                            { name: "Mundo", slug: "MUNDO", color: "plantao" },
+                            { name: "Tech", slug: "TECH", color: "ciencia" },
+                            { name: "Games", slug: "GAMES", color: "arena" },
+                            { name: "Entretenimento", slug: "ENTRETENIMENTO", color: "holofote" },
+                            { name: "Ciência", slug: "CIENCIA", color: "ciencia" },
+                            { name: "Economia", slug: "ECONOMIA", color: "mercado" },
+                            { name: "Esportes", slug: "ESPORTES", color: "arena" },
+                            { name: "Saúde", slug: "SAUDE", color: "vital" },
                         ].map((cat) => (
-                            <li key={cat.name} className="group relative py-3">
-                                <Link href={`/category/${cat.slug}`} className={`text-sm font-black uppercase tracking-widest px-2 py-1 text-gray-600 transition-colors hover:text-[var(--color-${cat.color})]`}>
+                            <li key={cat.name} className="group relative whitespace-nowrap">
+                                <Link href={`/category/${cat.slug}`} className={`text-sm font-black uppercase tracking-widest px-3 py-1 text-gray-600 transition-colors hover:bg-gray-100 rounded-md hover:text-black`}>
                                     {cat.name}
                                 </Link>
                             </li>

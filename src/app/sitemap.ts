@@ -6,7 +6,7 @@ const SITE_URL = 'https://eaclique.com.br'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Busca últimas 5000 notícias
     const { data: noticias } = await supabase
-        .from('Noticias')
+        .from('noticias')
         .select('slug, created_at')
         .order('created_at', { ascending: false })
         .limit(5000)

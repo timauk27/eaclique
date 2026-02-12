@@ -35,7 +35,7 @@ const categoryColors: Record<string, string> = {
 // Fetch news data
 async function getNewsData(slug: string) {
     const { data, error } = await supabase
-        .from('Noticias')
+        .from('noticias')
         .select('*')
         .eq('slug', slug)
         .single()

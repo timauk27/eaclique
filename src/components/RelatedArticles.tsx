@@ -9,7 +9,7 @@ interface RelatedArticlesProps {
 
 async function getRelatedNews(newsId: number, category: string) {
     const { data } = await supabase
-        .from('Noticias')
+        .from('noticias')
         .select('id, slug, titulo_viral, imagem_capa, imagem_alt, categoria, created_at')
         .eq('categoria', category)
         .neq('id', newsId)

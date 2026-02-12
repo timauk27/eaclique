@@ -1,20 +1,20 @@
 import { supabase } from '@/lib/supabase'
 
 export async function GET() {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br'
 
-    // Fetch latest 50 articles
-    const { data: articles } = await supabase
-        .from('Noticias')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50)
+  // Fetch latest 50 articles
+  const { data: articles } = await supabase
+    .from('noticias')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(50)
 
-    const feedItems = (articles || []).map((article) => {
-        const pubDate = new Date(article.created_at).toUTCString()
-        const articleUrl = `${siteUrl}/noticia/${article.slug}`
+  const feedItems = (articles || []).map((article) => {
+    const pubDate = new Date(article.created_at).toUTCString()
+    const articleUrl = `${siteUrl}/noticia/${article.slug}`
 
-        return `
+    return `
     <item>
       <title><![CDATA[${article.titulo_viral}]]></title>
       <link>${articleUrl}</link>
@@ -24,9 +24,9 @@ export async function GET() {
       <category>${article.categoria}</category>
       ${article.imagem_capa ? `<enclosure url="${article.imagem_capa}" type="image/jpeg" />` : ''}
     </item>`
-    }).join('\n')
+  }).join('\n')
 
-    const rssFeed = `<?xml version="1.0" encoding="UTF-8" ?>
+  const rssFeed = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>EAClique - Portal de Notícias</title>
@@ -44,10 +44,10 @@ ${feedItems}
   </channel>
 </rss>`
 
-    return new Response(rssFeed, {
-        headers: {
-            'Content-Type': 'application/xml; charset=utf-8',
-            'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-        },
-    })
+  return new Response(rssFeed, {
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    },
+  })
 }

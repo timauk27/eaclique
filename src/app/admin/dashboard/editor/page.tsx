@@ -6,7 +6,7 @@ import { Edit, Plus, Save, X, Trash2, ExternalLink, FileText, RefreshCw, Image a
 import Link from 'next/link'
 
 interface Noticia {
-    id: number
+    id: string
     titulo_viral: string
     categoria: string
     conteudo_html: string
@@ -16,12 +16,17 @@ interface Noticia {
     created_at: string
 }
 
+import { useSearchParams } from 'next/navigation'
+
 export default function AdminEditorPage() {
+    const searchParams = useSearchParams()
+    const idToEdit = searchParams.get('id')
+
     const [noticias, setNoticias] = useState<Noticia[]>([])
     const [loading, setLoading] = useState(true)
-    const [editingId, setEditingId] = useState<number | null>(null)
+    const [editingId, setEditingId] = useState<string | null>(null)
     const [showNewForm, setShowNewForm] = useState(false)
-    const [replacingImageId, setReplacingImageId] = useState<number | null>(null)
+    const [replacingImageId, setReplacingImageId] = useState<string | null>(null)
     const [newImageUrl, setNewImageUrl] = useState('')
     const [uploadingImage, setUploadingImage] = useState(false)
 
@@ -53,6 +58,25 @@ export default function AdminEditorPage() {
     useEffect(() => {
         loadNoticias()
     }, [])
+
+    useEffect(() => {
+        if (idToEdit) {
+            // Se tiver ID na URL, busca essa notícia específica para editar
+            async function loadSpecificNews() {
+                const { data, error } = await supabase
+                    .from('Noticias')
+                    .select('*')
+                    .eq('id', idToEdit)
+                    .single()
+
+                if (data && !error) {
+                    startEdit(data)
+                    setShowNewForm(true) // Mostra o form
+                }
+            }
+            loadSpecificNews()
+        }
+    }, [idToEdit])
 
     const startEdit = (noticia: Noticia) => {
         setEditingId(noticia.id)
@@ -125,7 +149,7 @@ export default function AdminEditorPage() {
         }
     }
 
-    const deleteNoticia = async (id: number) => {
+    const deleteNoticia = async (id: string) => {
         if (!confirm('Tem certeza que deseja deletar esta notícia?')) return
 
         const { error } = await supabase
@@ -151,7 +175,7 @@ export default function AdminEditorPage() {
         setShowNewForm(false)
     }
 
-    const replaceImage = async (noticiaId: number) => {
+    const replaceImage = async (noticiaId: string) => {
         if (!newImageUrl.trim()) {
             alert('❌ Cole a URL da imagem!')
             return

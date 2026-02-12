@@ -41,6 +41,7 @@ const categoryMap: Record<string, string | string[]> = {
     'motor': 'MOTOR',
     'auto': 'MOTOR',
     'estilo': 'ESTILO',
+    'entretenimento': 'ENTRETENIMENTO',
 }
 
 // Category colors (usando as mesmas cores do menu)
@@ -64,13 +65,14 @@ const categoryColors: Record<string, string> = {
     'FAMOSOS': 'bg-pink-600',
     'MOTOR': 'bg-gray-600',
     'ESTILO': 'bg-indigo-600',
+    'ENTRETENIMENTO': 'bg-pink-600',
 }
 
 
 // Fetch news by category (case-insensitive)
 async function getNewsByCategory(category: string | string[]) {
     let query = supabase
-        .from('Noticias')
+        .from('noticias')
         .select('*')
 
     if (Array.isArray(category)) {

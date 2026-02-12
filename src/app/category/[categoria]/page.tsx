@@ -11,24 +11,25 @@ interface PageProps {
 
 // Category mapping (URL slug to database category)
 // Categorias reais no banco: TECH, BRASIL, MUNDO, GAMES, ECONOMIA, SAUDE, ESPORTES, CIENCIA, CINEMA, FAMOSOS, HOLOFOTE, ARENA, PIXEL, PLAY, VITAL, MERCADO, PLANTÃO, MOTOR, ESTILO
-const categoryMap: Record<string, string> = {
+const categoryMap: Record<string, string | string[]> = {
     // Menu principal (mapeia exatamente para as categorias do banco)
     'plantão': 'PLANTÃO',
     'plantao': 'PLANTÃO',
     'brasil': 'BRASIL',
     'mundo': 'MUNDO',
-    'arena': 'ARENA',
+    'arena': ['ARENA', 'ESPORTES'], // Arena exibe: Arena + Esportes (FUTEBOL, VÔLEI, ETC)
+    'esportes': ['ARENA', 'ESPORTES'],
     'holofote': 'HOLOFOTE',
     'mercado': 'MERCADO',
     'pixel': 'PIXEL',
-    'play': 'PLAY',
+    'play': ['PLAY', 'GAMES'], // Play exibe: Play + Games (PS5, XBOX, ETC)
+    'games': ['PLAY', 'GAMES'],
     'vital': 'VITAL',
 
     // Aliases e categorias adicionais
     'tech': 'TECH',
     'tecnologia': 'TECH',
-    'games': 'GAMES',
-    'jogos': 'GAMES',
+    'jogos': ['PLAY', 'GAMES'],
     'cinema': 'CINEMA',
     'filmes': 'CINEMA',
     'economia': 'ECONOMIA',
@@ -36,7 +37,6 @@ const categoryMap: Record<string, string> = {
     'saude': 'SAUDE',
     'ciencia': 'CIENCIA',
     'ciência': 'CIENCIA',
-    'esportes': 'ESPORTES',
     'famosos': 'FAMOSOS',
     'motor': 'MOTOR',
     'auto': 'MOTOR',
@@ -68,11 +68,18 @@ const categoryColors: Record<string, string> = {
 
 
 // Fetch news by category (case-insensitive)
-async function getNewsByCategory(category: string) {
-    const { data, error } = await supabase
+async function getNewsByCategory(category: string | string[]) {
+    let query = supabase
         .from('Noticias')
         .select('*')
-        .ilike('categoria', category) // Case-insensitive match
+
+    if (Array.isArray(category)) {
+        query = query.in('categoria', category)
+    } else {
+        query = query.ilike('categoria', category)
+    }
+
+    const { data, error } = await query
         .order('created_at', { ascending: false })
         .limit(100)
 
@@ -87,26 +94,27 @@ async function getNewsByCategory(category: string) {
 // Generate metadata
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { categoria } = await params
-    const dbCategory = categoryMap[categoria.toLowerCase()]
+    const dbCategoryVal = categoryMap[categoria.toLowerCase()]
 
-    if (!dbCategory) {
+    if (!dbCategoryVal) {
         return {
             title: 'Categoria não encontrada - EAClique',
         }
     }
 
+    const titleCategory = Array.isArray(dbCategoryVal) ? dbCategoryVal[0] : dbCategoryVal
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br'
     const categoryUrl = `${siteUrl}/category/${categoria.toLowerCase()}`
 
     return {
-        title: `${dbCategory} - Notícias e Atualizações | EAClique`,
-        description: `Fique por dentro das últimas notícias de ${dbCategory} no EAClique. Notícias atualizadas em tempo real.`,
+        title: `${titleCategory} - Notícias e Atualizações | EAClique`,
+        description: `Fique por dentro das últimas notícias de ${titleCategory} no EAClique. Notícias atualizadas em tempo real.`,
         alternates: {
             canonical: categoryUrl,
         },
         openGraph: {
-            title: `${dbCategory} - Notícias e Atualizações`,
-            description: `Fique por dentro das últimas notícias de ${dbCategory} no EAClique.`,
+            title: `${titleCategory} - Notícias e Atualizações`,
+            description: `Fique por dentro das últimas notícias de ${titleCategory} no EAClique.`,
             url: categoryUrl,
             siteName: 'EAClique',
             locale: 'pt_BR',
@@ -114,22 +122,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         },
         twitter: {
             card: 'summary_large_image',
-            title: `${dbCategory} - Notícias e Atualizações`,
-            description: `Fique por dentro das últimas notícias de ${dbCategory} no EAClique.`,
+            title: `${titleCategory} - Notícias e Atualizações`,
+            description: `Fique por dentro das últimas notícias de ${titleCategory} no EAClique.`,
         },
     }
 }
 
 export default async function CategoryPage({ params }: PageProps) {
     const { categoria } = await params
-    const dbCategory = categoryMap[categoria.toLowerCase()]
+    const dbCategoryVal = categoryMap[categoria.toLowerCase()]
 
-    if (!dbCategory) {
+    if (!dbCategoryVal) {
         notFound()
     }
 
-    const news = await getNewsByCategory(dbCategory)
-    const categoryColor = categoryColors[dbCategory] || 'bg-slate-600'
+    const news = await getNewsByCategory(dbCategoryVal)
+
+    const titleCategory = Array.isArray(dbCategoryVal) ? dbCategoryVal[0] : dbCategoryVal
+    const categoryColor = categoryColors[titleCategory] || 'bg-slate-600'
 
     return (
         <div className="min-h-screen bg-white">
@@ -138,7 +148,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 <div className="mb-8">
                     <div className="flex items-center gap-4 mb-4">
                         <span className={`inline-block px-4 py-2 text-sm font-bold uppercase tracking-wider text-white rounded ${categoryColor}`}>
-                            {dbCategory}
+                            {titleCategory}
                         </span>
                         <div className="flex items-center gap-2 text-sm text-slate-500">
                             <TrendingUp className="h-4 w-4" />
@@ -146,7 +156,7 @@ export default async function CategoryPage({ params }: PageProps) {
                         </div>
                     </div>
                     <h1 className="text-4xl font-bold text-slate-900">
-                        Últimas de {dbCategory}
+                        Últimas de {titleCategory}
                     </h1>
                 </div>
 

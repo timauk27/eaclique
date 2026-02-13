@@ -15,8 +15,8 @@ export default function CategoryEditor({ open, onClose, onSaved, initial, parent
     const [slug, setSlug] = useState(initial?.slug || '')
     const [cor, setCor] = useState(initial?.cor || '#ff0000')
     const [ativo, setAtivo] = useState(initial?.ativo ?? true)
-    const [tags, setTags] = useState((initial?.tags || []).join(', '))
-    const [rss, setRss] = useState((initial?.rss_urls || []).join('\n'))
+    const [tags, setTags] = useState<string>((initial?.tags || []).join(', '))
+    const [rss, setRss] = useState<string>((initial?.rss_urls || []).join('\n'))
     const [saving, setSaving] = useState(false)
 
     useEffect(() => {

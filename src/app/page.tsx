@@ -54,6 +54,15 @@ export default async function Home() {
   const heroPost = mainPosts[0] || {};
   const sidePosts = mainPosts.slice(1, 3);
 
+  // Calculate trending (most read)
+  const trendingPosts = [...posts]
+    .sort((a, b) => {
+      const viewsA = (a.views_fake || 0) + (a.views_reais || 0);
+      const viewsB = (b.views_fake || 0) + (b.views_reais || 0);
+      return viewsB - viewsA;
+    })
+    .slice(0, 5);
+
   return (
     <main className="min-h-screen bg-gray-50 pb-12 font-sans">
 
@@ -208,11 +217,17 @@ export default async function Home() {
                   <h4 className="font-black uppercase tracking-tighter">Em Alta</h4>
                 </div>
                 <ol className="list-decimal list-inside space-y-3 font-bold text-gray-700 text-sm">
-                  <li className="marker:text-purple-500 marker:font-black hover:text-purple-700 cursor-pointer">Dólar despenca após anúncio do Fed</li>
-                  <li className="marker:text-purple-500 marker:font-black hover:text-purple-700 cursor-pointer">Neymar anuncia aposentadoria (Fake)</li>
-                  <li className="marker:text-purple-500 marker:font-black hover:text-purple-700 cursor-pointer">Novo iPhone 17 vaza na web</li>
-                  <li className="marker:text-purple-500 marker:font-black hover:text-purple-700 cursor-pointer">Greve geral confirmada para sexta</li>
-                  <li className="marker:text-purple-500 marker:font-black hover:text-purple-700 cursor-pointer">BBB 26: Paredão falso hoje</li>
+                  {trendingPosts.length > 0 ? (
+                    trendingPosts.map((post, idx) => (
+                      <li key={idx} className="marker:text-purple-500 marker:font-black hover:text-purple-700 cursor-pointer transition-colors">
+                        <Link href={`/noticia/${post.slug}`} className="hover:underline">
+                          {post.titulo_viral}
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-400 font-normal">Sem dados de tendência ainda.</li>
+                  )}
                 </ol>
               </div>
             </div>

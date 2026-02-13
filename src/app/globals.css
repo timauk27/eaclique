@@ -10,9 +10,11 @@
   --color-background: var(--bg-page);
   --color-foreground: var(--text-primary);
 
+  --font-heading: var(--font-montserrat);
+  --font-body: var(--font-nunito);
+  
   --font-sans: var(--font-heading);
-  /* Override sans with our heading font */
-  --font-mono: var(--font-body);
+  --font-mono: var(--font-geist-mono);
 
   /* Mapping Standard Colors to Semantic Variables */
   /* This effectively "themes" the hardcoded Tailwind classes */

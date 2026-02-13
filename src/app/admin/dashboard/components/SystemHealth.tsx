@@ -7,16 +7,21 @@ import { CheckCircle, AlertTriangle, Database, Server, RefreshCw } from 'lucide-
 export default function SystemHealth() {
     const [dbStatus, setDbStatus] = useState<'ok' | 'error'>('ok')
     const [lastSync, setLastSync] = useState<string | null>(null)
-    const [storageUsage, setStorageUsage] = useState<number>(45) // Mock percentage
+    const [totalNews, setTotalNews] = useState<number>(0)
+    const [latency, setLatency] = useState<number>(0)
 
     useEffect(() => {
         async function checkHealth() {
             setLastSync(new Date().toLocaleTimeString())
+            const start = performance.now()
 
             try {
-                const { error } = await supabase.from('noticias').select('id').limit(1)
+                const { count, error } = await supabase.from('noticias').select('*', { count: 'exact', head: true })
+                const end = performance.now()
                 if (error) throw error
                 setDbStatus('ok')
+                setLatency(Math.round(end - start))
+                setTotalNews(count || 0)
             } catch (e) {
                 console.error(e)
                 setDbStatus('error')
@@ -55,9 +60,9 @@ export default function SystemHealth() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Server className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700">API Latency</span>
+                        <span className="text-sm text-gray-700">Latência DB</span>
                     </div>
-                    <span className="text-xs font-medium text-gray-900">42ms</span>
+                    <span className="text-xs font-medium text-gray-900">{latency}ms</span>
                 </div>
 
                 {/* Last Backup/Sync */}
@@ -69,16 +74,16 @@ export default function SystemHealth() {
                     <span className="text-xs text-gray-500">{lastSync}</span>
                 </div>
 
-                {/* Storage Meter */}
+                {/* Total News Count */}
                 <div className="pt-2 border-t mt-2">
                     <div className="flex justify-between text-xs mb-1">
-                        <span className="text-gray-500">Storage (Supabase)</span>
-                        <span className="font-medium text-gray-900">{storageUsage}%</span>
+                        <span className="text-gray-500">Total de Notícias</span>
+                        <span className="font-medium text-gray-900">{totalNews}</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-1.5">
                         <div
                             className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
-                            style={{ width: `${storageUsage}%` }}
+                            style={{ width: '100%' }}
                         ></div>
                     </div>
                 </div>

@@ -29,10 +29,29 @@ export default function CategoriesAdmin() {
 
     const load = async () => {
         setLoading(true)
-        const res = await fetch('/api/admin/categorias')
-        const data = await res.json()
-        setCats(data || [])
-        setLoading(false)
+        try {
+            const res = await fetch('/api/admin/categorias')
+            if (!res.ok) {
+                const err = await res.json()
+                console.error('Failed to load categories:', err)
+                alert(`Erro ao carregar categorias: ${err.error || res.statusText}`)
+                setCats([])
+                return
+            }
+            const data = await res.json()
+            console.log('Categories loaded:', data)
+            if (Array.isArray(data)) {
+                setCats(data)
+            } else {
+                console.error('Invalid data format:', data)
+                setCats([])
+            }
+        } catch (e) {
+            console.error('Load error:', e)
+            alert('Erro de conexão ao carregar categorias.')
+        } finally {
+            setLoading(false)
+        }
     }
 
     const tree = useMemo(() => {

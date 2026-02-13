@@ -44,27 +44,42 @@ export default function CategoryEditor({ open, onClose, onSaved, initial, parent
 
     const handleSave = async () => {
         setSaving(true)
-        const payload: any = {
-            action: initial?.id ? 'update' : 'create',
-            nome,
-            slug,
-            cor,
-            ativo,
-            tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
-            rss_urls: rss.split(/\n|,|;/).map((r) => r.trim()).filter(Boolean),
-        }
-        if (initial?.id) payload.id = initial.id
-        if (parentId && !initial?.id) payload.parent_id = parentId
+        try {
+            const payload: any = {
+                action: initial?.id ? 'update' : 'create',
+                id: initial?.id,
+                nome,
+                slug,
+                cor,
+                ativo,
+                parent_id: parentId || (initial?.parent_id ?? null),
+                tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+                rss_urls: rss.split(/\n|,|;/).map((r) => r.trim()).filter(Boolean),
+            }
 
-        const res = await fetch('/api/admin/categorias', {
-            method: 'POST',
-            body: JSON.stringify(payload),
-            headers: { 'Content-Type': 'application/json' }
-        })
-        const data = await res.json()
-        setSaving(false)
-        onSaved(data)
-        onClose()
+            const res = await fetch('/api/admin/categorias', {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'application/json' }
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                alert(`Erro ao salvar: ${data.error || 'Erro desconhecido'}`)
+                console.error(data)
+                setSaving(false)
+                return
+            }
+
+            setSaving(false)
+            onSaved(data)
+            onClose()
+        } catch (e) {
+            console.error(e)
+            alert('Erro de conexão ao salvar categoria.')
+            setSaving(false)
+        }
     }
 
     return (

@@ -184,7 +184,7 @@ export default async function NewsPage({ params }: PageProps) {
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br'
     const newsUrl = `${siteUrl}/noticia/${news.slug}`
 
-    const categoryColor = categoryColors[news.categoria] || 'bg-slate-600'
+    const categoryColor = categoryColors[news.categoria || 'Geral'] || 'bg-slate-600'
 
     const contentElements = parseContentWithAds(
         news.conteudo_html,
@@ -208,7 +208,7 @@ export default async function NewsPage({ params }: PageProps) {
             <BreadcrumbSchema
                 items={[
                     { name: 'Home', url: '/' },
-                    { name: news.categoria, url: `/categoria/${news.categoria.toLowerCase()}` },
+                    { name: news.categoria || 'Geral', url: `/categoria/${(news.categoria || 'geral').toLowerCase()}` },
                     { name: news.titulo_viral, url: `/noticia/${news.slug}` }
                 ]}
             />
@@ -226,8 +226,8 @@ export default async function NewsPage({ params }: PageProps) {
                             Home
                         </Link>
                         <ChevronRight className="h-4 w-4" />
-                        <Link href={`/categoria/${news.categoria.toLowerCase()}`} className="hover:text-blue-600">
-                            {news.categoria}
+                        <Link href={`/categoria/${(news.categoria || 'geral').toLowerCase()}`} className="hover:text-blue-600">
+                            {news.categoria || 'Geral'}
                         </Link>
                         <ChevronRight className="h-4 w-4" />
                         <span className="text-slate-900 truncate">
@@ -247,7 +247,7 @@ export default async function NewsPage({ params }: PageProps) {
                             {/* Category Badge */}
                             <div className="mb-4">
                                 <span className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider text-white rounded ${categoryColor}`}>
-                                    {news.categoria}
+                                    {news.categoria || 'Geral'}
                                 </span>
                             </div>
 

@@ -38,6 +38,7 @@ export default function CategoriesAdmin() {
     const tree = useMemo(() => {
         const map: Record<string, Cat & { children?: Cat[] }> = {}
         const roots: (Cat & { children?: Cat[] })[] = []
+        if (!Array.isArray(cats)) return []
         cats.forEach(c => { map[c.id] = { ...c, children: [] } })
         cats.forEach(c => {
             if (c.parent_id && map[c.parent_id]) map[c.parent_id].children!.push(map[c.id])

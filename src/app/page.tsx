@@ -47,6 +47,7 @@ export default async function Home() {
   // Filter by actual database categories
   const arenaPosts = posts.filter(p => p.categoria?.toUpperCase() === 'ESPORTES' || p.categoria?.toUpperCase() === 'ARENA').slice(0, 4);
   const holofotePosts = posts.filter(p => p.categoria?.toUpperCase() === 'HOLOFOTE' || p.categoria?.toUpperCase() === 'FAMOSOS' || p.categoria?.toUpperCase() === 'CINEMA' || p.categoria?.toUpperCase() === 'ENTRETENIMENTO' || p.categoria?.toUpperCase() === 'CELEBRIDADES' || p.categoria?.toUpperCase() === 'MODA' || p.categoria?.toUpperCase() === 'BELEZA' || p.categoria?.toUpperCase() === 'LIFESTYLE').slice(0, 9);
+  const worldPosts = posts.filter(p => p.categoria?.toUpperCase() === 'MUNDO' || p.categoria?.toUpperCase() === 'BRASIL' || p.categoria?.toUpperCase() === 'POLITICA' || p.categoria?.toUpperCase() === 'ECONOMIA' || p.categoria?.toUpperCase() === 'INTERNACIONAL').slice(0, 4);
   const techPosts = posts.filter(p => p.categoria?.toUpperCase() === 'TECH' || p.categoria?.toUpperCase() === 'PIXEL').slice(0, 4);
   const mainPosts = posts.slice(0, 5);
 
@@ -136,6 +137,37 @@ export default async function Home() {
           <AdBillboard />
         </section>
 
+        {/* BRASIL & MUNDO SECTION */}
+        <section className="mb-12 bg-blue-50/50 p-6 -mx-4 md:mx-0 rounded-xl border border-blue-100">
+          <SectionHeader title="Brasil & Mundo" color="ciencia" categoryLink="/category/mundo" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {worldPosts.length > 0 ? worldPosts.map((post, idx) => (
+              <div key={idx} className={idx === 0 ? "md:col-span-2" : ""}>
+                {idx === 0 ? (
+                  <FeatureCard
+                    slug={post.slug}
+                    category={post.categoria || "Mundo"}
+                    categoryColor="ciencia"
+                    title={post.titulo_viral} image={post.imagem_capa}
+                    size="small"
+                  />
+                ) : (
+                  <CompactCard
+                    slug={post.slug}
+                    category={post.categoria || "Mundo"}
+                    categoryColor="ciencia"
+                    title={post.titulo_viral}
+                    image={post.imagem_capa}
+                    time="Há 1h"
+                  />
+                )}
+              </div>
+            )) : (
+              <div className="col-span-4 text-center py-10 text-gray-400">Sem notícias de Brasil & Mundo no momento.</div>
+            )}
+          </div>
+        </section>
+
         {/* PIXEL/TECH SECTION */}
         <section className="mb-12 bg-cyan-50/50 p-6 -mx-4 md:mx-0 rounded-xl border border-cyan-100">
           <SectionHeader title="Pixel & Tecnologia" color="pixel" categoryLink="/category/tech" />
@@ -150,10 +182,12 @@ export default async function Home() {
                     size="small"
                   />
                 ) : (
-                  <TextCard
+                  <CompactCard
                     slug={post.slug}
                     category="Tech" categoryColor="pixel"
-                    title={post.titulo_viral} time="2h atrás"
+                    title={post.titulo_viral}
+                    image={post.imagem_capa}
+                    time="2h atrás"
                   />
                 )}
               </div>

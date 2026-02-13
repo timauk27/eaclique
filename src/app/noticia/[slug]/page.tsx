@@ -173,6 +173,20 @@ function parseContentWithAds(
     return elements
 }
 
+// Helper to slugify category names
+function slugify(text: string) {
+    return text
+        .toString()
+        .toLowerCase()
+        .normalize('NFD') // Split accents from letters
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/\s+/g, '-') // Replace spaces with -
+        .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-') // Replace multiple - with single -
+        .replace(/^-+/, '') // Trim - from start of text
+        .replace(/-+$/, '') // Trim - from end of text
+}
+
 export default async function NewsPage({ params }: PageProps) {
     const { slug } = await params
     const news = await getNewsData(slug)
@@ -185,6 +199,7 @@ export default async function NewsPage({ params }: PageProps) {
     const newsUrl = `${siteUrl}/noticia/${news.slug}`
 
     const categoryColor = categoryColors[news.categoria || 'Geral'] || 'bg-slate-600'
+    const categorySlug = slugify(news.categoria || 'geral')
 
     const contentElements = parseContentWithAds(
         news.conteudo_html,
@@ -208,7 +223,7 @@ export default async function NewsPage({ params }: PageProps) {
             <BreadcrumbSchema
                 items={[
                     { name: 'Home', url: '/' },
-                    { name: news.categoria || 'Geral', url: `/categoria/${(news.categoria || 'geral').toLowerCase()}` },
+                    { name: news.categoria || 'Geral', url: `/category/${categorySlug}` },
                     { name: news.titulo_viral, url: `/noticia/${news.slug}` }
                 ]}
             />
@@ -226,7 +241,7 @@ export default async function NewsPage({ params }: PageProps) {
                             Home
                         </Link>
                         <ChevronRight className="h-4 w-4" />
-                        <Link href={`/categoria/${(news.categoria || 'geral').toLowerCase()}`} className="hover:text-blue-600">
+                        <Link href={`/category/${categorySlug}`} className="hover:text-blue-600">
                             {news.categoria || 'Geral'}
                         </Link>
                         <ChevronRight className="h-4 w-4" />

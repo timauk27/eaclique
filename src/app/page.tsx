@@ -36,7 +36,7 @@ async function getData() {
     .from("noticias")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(100); // Increased from 20 to 100 to have more content
+    .limit(500); // Increased from 100 to 500 to have more content
 
   return posts || [];
 }

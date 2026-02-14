@@ -48,6 +48,9 @@ export const metadata: Metadata = {
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br',
     siteName: 'EAClique',
   },
+  other: {
+    'monetag': '3ab84899d982d84a7cd3a24d6426a4b8',
+  },
 };
 
 import { MegaHeader } from "@/components/MegaHeader";

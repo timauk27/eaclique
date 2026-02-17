@@ -1,6 +1,6 @@
 'use client'
 
-import { FileText, Image, DollarSign, Megaphone, CheckCircle, Users, Settings } from 'lucide-react'
+import { FileText, Image, DollarSign, Megaphone, CheckCircle, Users, Settings, Target } from 'lucide-react'
 import Link from 'next/link'
 import AnalyticsCharts from './components/AnalyticsCharts'
 import ActivityStream from './components/ActivityStream'
@@ -13,6 +13,12 @@ export default function AdminDashboardHome() {
             label: 'Moderar News',
             icon: CheckCircle,
             color: 'bg-indigo-600 hover:bg-indigo-700'
+        },
+        {
+            href: '/admin/dashboard/missoes',
+            label: 'Missões Robô',
+            icon: Target,
+            color: 'bg-pink-600 hover:bg-pink-700'
         },
         {
             href: '/admin/dashboard/editor',

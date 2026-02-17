@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+    const supabase = createClient()
     const router = useRouter()
     const [loading, setLoading] = useState(true)
 

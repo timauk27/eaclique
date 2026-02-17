@@ -1,6 +1,6 @@
 'use client'
 
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Lock, Mail, Key, AlertCircle } from 'lucide-react'
@@ -8,6 +8,7 @@ import { Lock, Mail, Key, AlertCircle } from 'lucide-react'
 import { Suspense } from 'react'
 
 function LoginForm() {
+    const supabase = createClient()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)

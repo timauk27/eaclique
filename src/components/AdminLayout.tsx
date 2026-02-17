@@ -13,7 +13,8 @@ import {
     Menu,
     X,
     Home,
-    FileText
+    FileText,
+    Target
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -26,6 +27,7 @@ interface AdminLayoutProps {
 const menuItems = [
     { href: '/admin/dashboard', label: 'Visão Geral', icon: LayoutDashboard },
     { href: '/admin/dashboard/noticias', label: 'Notícias', icon: FileText },
+    { href: '/admin/dashboard/missoes', label: 'Missões Robô', icon: Target },
     { href: '/admin/dashboard/categorias', label: 'Categorias', icon: FileText },
     { href: '/admin/dashboard/editor', label: 'Editor', icon: Edit },
     { href: '/admin/dashboard/afiliados', label: 'Afiliados', icon: DollarSign },

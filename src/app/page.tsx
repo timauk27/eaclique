@@ -81,17 +81,21 @@ const CATEGORY_MAP: Record<string, string> = {
 
   'HOLOFOTE': 'Holofote & Famosos',
   'FAMOSOS': 'Holofote & Famosos',
+  'ENTRETENIMENTO': 'Holofote & Famosos',
 
   'ECONOMIA': 'Mercado & Finanças',
 
   'BRASIL': 'Poder & Política',
   'POLITICA': 'Poder & Política',
+  'POLÍTICA': 'Poder & Política',
 
   'MUNDO': 'Mundo & Internacional',
   'INTERNACIONAL': 'Mundo & Internacional',
 
   'SAUDE': 'Vital & Ciência',
-  'CIENCIA': 'Vital & Ciência'
+  'SAÚDE': 'Vital & Ciência',
+  'CIENCIA': 'Vital & Ciência',
+  'CIÊNCIA': 'Vital & Ciência'
 };
 
 const SECTION_COLORS: Record<string, string> = {

@@ -35,6 +35,7 @@ const categoryMap: Record<string, string | string[]> = {
     'economia': 'ECONOMIA',
     'dinheiro': 'ECONOMIA',
     'saude': 'SAUDE',
+    'saúde': 'SAUDE',
     'ciencia': 'CIENCIA',
     'ciência': 'CIENCIA',
     'famosos': 'FAMOSOS',
@@ -42,6 +43,8 @@ const categoryMap: Record<string, string | string[]> = {
     'auto': 'MOTOR',
     'estilo': 'ESTILO',
     'entretenimento': 'ENTRETENIMENTO',
+    'politica': 'POLITICA',
+    'política': 'POLITICA',
 }
 
 // Category colors (usando as mesmas cores do menu)
@@ -132,16 +135,88 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CategoryPage({ params }: PageProps) {
     const { categoria } = await params
-    const dbCategoryVal = categoryMap[categoria.toLowerCase()]
+    const categoryKey = decodeURIComponent(categoria).toLowerCase()
 
-    if (!dbCategoryVal) {
+    // 1. First, try to find the category in the DB to get its ID and Hierarchy
+    const { data: catData, error } = await supabase
+        .from('categorias')
+        .select('id, nome, slug')
+        .eq('slug', categoryKey)
+        .maybeSingle()
+
+    let dbCategoryName = ''
+    let categoryId = ''
+
+    if (catData) {
+        dbCategoryName = catData.nome
+        categoryId = catData.id
+    } else {
+        // Fallback: Check static map if not found in DB by slug (legacy support)
+        const mapped = categoryMap[categoryKey]
+        if (mapped) {
+            const name = Array.isArray(mapped) ? mapped[0] : mapped
+            // We won't have the ID here easily, so we might need to query by name or just use the name for color
+            // But for the NEW requirement (Subcategories), we REALLY need the ID.
+            // Let's try to fetch by name if slug failed
+            const { data: catByName } = await supabase
+                .from('categorias')
+                .select('id, nome')
+                .ilike('nome', name)
+                .maybeSingle()
+
+            if (catByName) {
+                dbCategoryName = catByName.nome
+                categoryId = catByName.id
+            } else {
+                // Last resort: Just use the name and hope for the best (no subcategory support)
+                dbCategoryName = name
+            }
+        }
+    }
+
+    if (!dbCategoryName) {
         notFound()
     }
 
-    const news = await getNewsByCategory(dbCategoryVal)
+    // 2. Fetch Subcategories (if we have an ID)
+    let categoryIdsToFetch: string[] = []
 
-    const titleCategory = Array.isArray(dbCategoryVal) ? dbCategoryVal[0] : dbCategoryVal
-    const categoryColor = categoryColors[titleCategory] || 'bg-slate-600'
+    if (categoryId) {
+        categoryIdsToFetch.push(categoryId)
+        const { data: children } = await supabase
+            .from('categorias')
+            .select('id')
+            .eq('parent_id', categoryId)
+
+        if (children) {
+            categoryIdsToFetch.push(...children.map(c => c.id))
+        }
+    }
+
+    // 3. Fetch News
+    let news: any[] = []
+    if (categoryIdsToFetch.length > 0) {
+        // Fetch by IDs (includes subcategories)
+        const { data } = await supabase
+            .from('noticias')
+            .select('*')
+            .in('categoria_id', categoryIdsToFetch)
+            .order('created_at', { ascending: false })
+            .limit(100)
+        news = data || []
+    } else {
+        // Fetch by Name (Legacy/Fallback)
+        const { data } = await supabase
+            .from('noticias')
+            .select('*')
+            .ilike('categoria', dbCategoryName)
+            .order('created_at', { ascending: false })
+            .limit(100)
+        news = data || []
+    }
+
+    const titleCategory = dbCategoryName
+    const categoryColor = categoryColors[titleCategory.toUpperCase()] || categoryColors[Object.keys(categoryColors).find(k => titleCategory.toUpperCase().includes(k)) || ''] || 'bg-slate-600'
 
     return (
         <div className="min-h-screen bg-white">

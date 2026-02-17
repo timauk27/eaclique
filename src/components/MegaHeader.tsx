@@ -92,7 +92,7 @@ function MenuItem({ category }: { category: Category }) {
     return (
         <li className="group relative">
             <Link
-                href={hasChildren ? '#' : `/category/${category.slug}`}
+                href={`/category/${category.slug}`}
                 className={`text-sm font-black uppercase tracking-widest px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 rounded-md hover:text-blue-700 flex items-center gap-1`}
             >
                 {category.nome}

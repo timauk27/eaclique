@@ -1,15 +1,13 @@
 'use client';
 
-import { useAdConfig, generateAdsterraCode } from '@/hooks/useAdConfig';
+import { useAdScript } from '@/hooks/useAdScript';
 
 export default function AdSkyscraper() {
-    const adConfig = useAdConfig('skyscraper');
+    const script = useAdScript('skyscraper');
 
-    if (!adConfig) {
-        return null; // Ad is disabled in config
+    if (!script) {
+        return null; // No active ad
     }
-
-    const adsterraCode = generateAdsterraCode(adConfig);
 
     return (
         <div className="sticky top-24 w-full rounded-lg overflow-hidden" style={{ minHeight: '300px' }}>
@@ -17,17 +15,7 @@ export default function AdSkyscraper() {
                 <div className="text-xs text-slate-400 text-center py-1 border-b border-slate-200 dark:border-slate-700">
                     PUBLICIDADE
                 </div>
-                <div className="flex items-center justify-center">
-                    <iframe
-                        srcDoc={adsterraCode}
-                        width="160"
-                        height="300"
-                        frameBorder="0"
-                        scrolling="no"
-                        style={{ border: 'none', display: 'block' }}
-                        title="Advertisement"
-                    />
-                </div>
+                <div className="flex items-center justify-center p-2" dangerouslySetInnerHTML={{ __html: script }} />
             </div>
         </div>
     );

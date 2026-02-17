@@ -14,12 +14,11 @@ interface Ad {
 }
 
 const POSICOES_DISPONIVEIS = [
-    { value: 'sidebar_top', label: 'Sidebar Topo' },
-    { value: 'sidebar_bottom', label: 'Sidebar Rodapé' },
-    { value: 'in_article', label: 'Dentro do Artigo' },
-    { value: 'billboard', label: 'Billboard (Topo)' },
-    { value: 'footer_sticky', label: 'Footer Sticky (Mobile)' },
-    { value: 'skyscraper', label: 'Skyscraper (Lateral)' },
+    { value: 'billboard', label: 'Billboard (Topo)', description: 'Banner largo no topo de todas as páginas (728x90).' },
+    { value: 'sidebar_top', label: 'Sidebar Topo', description: 'Acima da lista de "Últimas Notícias" na barra lateral.' },
+    { value: 'skyscraper', label: 'Skyscraper (Lateral)', description: 'Banner vertical na barra lateral que acompanha a rolagem (160x600 ou 300x600).' },
+    { value: 'in_article', label: 'Dentro do Artigo', description: 'Aparece automaticamente a cada 3 parágrafos dentro das notícias.' },
+    { value: 'footer_sticky', label: 'Footer Sticky (Mobile)', description: 'Banner fixo no rodapé apenas em dispositivos móveis.' },
 ]
 
 export default function AdminAdsPage() {
@@ -187,6 +186,11 @@ export default function AdminAdsPage() {
                                             </option>
                                         ))}
                                     </select>
+                                    {formData.posicao && (
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {POSICOES_DISPONIVEIS.find(p => p.value === formData.posicao)?.description}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Empresa */}
@@ -285,8 +289,8 @@ export default function AdminAdsPage() {
                                         <button
                                             onClick={() => toggleAtivo(ad.id, ad.ativo)}
                                             className={`p-2 rounded-lg transition ${ad.ativo
-                                                    ? 'bg-green-100 hover:bg-green-200 text-green-700'
-                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-500'
+                                                ? 'bg-green-100 hover:bg-green-200 text-green-700'
+                                                : 'bg-gray-100 hover:bg-gray-200 text-gray-500'
                                                 }`}
                                             title={ad.ativo ? 'Desativar' : 'Ativar'}
                                         >

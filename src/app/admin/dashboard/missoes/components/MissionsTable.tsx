@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { Clock, CheckCircle, XCircle, Loader, ChevronDown, ChevronRight } from 'lucide-react'
 
 interface Mission {
@@ -97,12 +97,12 @@ export default function MissionsTable({ missoes, onUpdate }: { missoes: Mission[
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {missoes.map((missao) => (
-                        <>
-                            <tr key={missao.id} className="hover:bg-gray-50">
+                        <Fragment key={missao.id}>
+                            <tr className="hover:bg-gray-50">
                                 <td className="px-4 py-4 whitespace-nowrap">
                                     <span className={`text-xs px-2 py-1 rounded ${missao.tipo_missao === 'link_especifico'
-                                            ? 'bg-purple-100 text-purple-800'
-                                            : 'bg-blue-100 text-blue-800'
+                                        ? 'bg-purple-100 text-purple-800'
+                                        : 'bg-blue-100 text-blue-800'
                                         }`}>
                                         {missao.tipo_missao === 'link_especifico' ? '🎯 Link' : '🔍 Busca'}
                                     </span>
@@ -195,7 +195,7 @@ export default function MissionsTable({ missoes, onUpdate }: { missoes: Mission[
                                     </td>
                                 </tr>
                             )}
-                        </>
+                        </Fragment>
                     ))}
                 </tbody>
             </table>

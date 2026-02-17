@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 export default function MissionForm({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
@@ -11,7 +11,28 @@ export default function MissionForm({ onSuccess, onCancel }: { onSuccess: () => 
     const [subcategoria, setSubcategoria] = useState('')
     const [prioridade, setPrioridade] = useState(5)
     const [loading, setLoading] = useState(false)
+    const [categorias, setCategorias] = useState<any[]>([])
     const supabase = createClient()
+
+    useEffect(() => {
+        const fetchCategorias = async () => {
+            console.log("Fetching categories...")
+            const { data, error } = await supabase
+                .from('categorias')
+                .select('id, nome')
+                .order('nome', { ascending: true })
+
+            if (error) {
+                console.error("Error fetching categories:", error)
+            } else {
+                console.log("Categories fetched:", data)
+                if (data) {
+                    setCategorias(data)
+                }
+            }
+        }
+        fetchCategorias()
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -20,11 +41,11 @@ export default function MissionForm({ onSuccess, onCancel }: { onSuccess: () => 
         try {
             // Debug: Check user session
             const { data: { user }, error: userError } = await supabase.auth.getUser()
-            
+
             if (userError) {
-                 console.error("Erro ao obter user:", userError)
+                console.error("Erro ao obter user:", userError)
             }
-            
+
             if (!user) {
                 console.error("ERRO CRÍTICO: Usuário não autenticado no cliente Supabase!")
                 // Opcional: throw new Error("Usuário não autenticado via Supabase Client")
@@ -79,8 +100,8 @@ export default function MissionForm({ onSuccess, onCancel }: { onSuccess: () => 
                         type="button"
                         onClick={() => setTipoMissao('link_especifico')}
                         className={`p-4 border-2 rounded-lg text-left transition ${tipoMissao === 'link_especifico'
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
                             }`}
                     >
                         <div className="font-bold text-gray-900">🎯 Link Específico</div>
@@ -92,8 +113,8 @@ export default function MissionForm({ onSuccess, onCancel }: { onSuccess: () => 
                         type="button"
                         onClick={() => setTipoMissao('pesquisa_tematica')}
                         className={`p-4 border-2 rounded-lg text-left transition ${tipoMissao === 'pesquisa_tematica'
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300'
                             }`}
                     >
                         <div className="font-bold text-gray-900">🔍 Pesquisa Temática</div>
@@ -151,12 +172,11 @@ export default function MissionForm({ onSuccess, onCancel }: { onSuccess: () => 
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="">Selecione...</option>
-                        <option value="PLANTÃO">PLANTÃO</option>
-                        <option value="ARENA">ARENA (Esportes)</option>
-                        <option value="PIXEL">PIXEL (Tecnologia)</option>
-                        <option value="HOLOFOTE">HOLOFOTE (Famosos)</option>
-                        <option value="MERCADO">MERCADO (Economia)</option>
-                        <option value="VITAL">VITAL (Saúde)</option>
+                        {categorias.map((cat) => (
+                            <option key={cat.id} value={cat.nome}>
+                                {cat.nome}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div>

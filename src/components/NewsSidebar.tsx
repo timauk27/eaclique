@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { Clock, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
+import AnuncioReal from '@/components/AnuncioReal'
+
 export default async function NewsSidebar() {
     // Fetch latest news
     const { data: latestNews } = await supabase
@@ -19,6 +21,9 @@ export default async function NewsSidebar() {
 
     return (
         <div className="space-y-8">
+            {/* Sidebar Top Ad */}
+            <AnuncioReal posicao="sidebar_top" className="mb-6" />
+
             {/* Latest News */}
             <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2 mb-4">

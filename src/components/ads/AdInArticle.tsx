@@ -1,15 +1,13 @@
 'use client';
 
-import { useAdConfig, generateAdsterraCode } from '@/hooks/useAdConfig';
+import { useAdScript } from '@/hooks/useAdScript';
 
 export default function AdInArticle() {
-    const adConfig = useAdConfig('in_article');
+    const script = useAdScript('in_article');
 
-    if (!adConfig) {
-        return null; // Ad is disabled in config
+    if (!script) {
+        return null; // No active ad
     }
-
-    const adsterraCode = generateAdsterraCode(adConfig);
 
     return (
         <div className="my-8 flex flex-col items-center">
@@ -17,15 +15,7 @@ export default function AdInArticle() {
                 Continua após a publicidade
             </p>
             <div className="bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
-                <iframe
-                    srcDoc={adsterraCode}
-                    width="300"
-                    height="250"
-                    frameBorder="0"
-                    scrolling="no"
-                    style={{ maxWidth: '100%', border: 'none', display: 'block' }}
-                    title="Advertisement"
-                />
+                <div dangerouslySetInnerHTML={{ __html: script }} />
             </div>
         </div>
     );

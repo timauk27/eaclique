@@ -40,7 +40,7 @@ async function main() {
     }
 
     const categories = new Set()
-    const samples = []
+    const samples: any[] = []
 
     data.forEach(item => {
         categories.add(item.categoria)

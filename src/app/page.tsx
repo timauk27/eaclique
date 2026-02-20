@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { FeatureCard, CompactCard, TextCard } from "@/components/Card";
 import { SectionHeader } from "@/components/Structure";
 import { Clock, TrendingUp, MapPin } from "lucide-react";
@@ -174,6 +175,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 pb-16 font-sans text-gray-900">
+      <GoogleAnalytics measurementId="G-ETDNPWYZ6L" />
 
       {/* HEADER / GREETING */}
       <div className="bg-white border-b border-gray-100 py-2">

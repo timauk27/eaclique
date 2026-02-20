@@ -84,7 +84,7 @@ export default function RootLayout({
         `}
       >
         <ThemeProvider>
-          <GoogleAnalytics measurementId="G-ETDNPWYZ6L" />
+
           <MegaHeader />
           {children}
           <Footer />

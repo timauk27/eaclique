@@ -1,10 +1,11 @@
 import { createClient } from "@/utils/supabase/server";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
+
 import { FeatureCard, CompactCard, TextCard } from "@/components/Card";
 import { SectionHeader } from "@/components/Structure";
 import { Clock, TrendingUp, MapPin } from "lucide-react";
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Script from 'next/script';
 import AdBillboard from '@/components/ads/AdBillboard';
 import AdSkyscraper from '@/components/ads/AdSkyscraper';
 import { headers } from 'next/headers';
@@ -175,7 +176,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 pb-16 font-sans text-gray-900">
-      <GoogleAnalytics measurementId="G-ETDNPWYZ6L" />
+
 
       {/* HEADER / GREETING */}
       <div className="bg-white border-b border-gray-100 py-2">
@@ -187,6 +188,17 @@ export default async function Home() {
           <div className="flex items-center gap-1">
             <MapPin className="w-3 h-3" />
             <span>{city}</span>
+            {/* Google tag (gtag.js) */}
+            <Script src="https://www.googletagmanager.com/gtag/js?id=G-ETDNPWYZ6L" strategy="afterInteractive" />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+
+                gtag('config', 'G-ETDNPWYZ6L');
+              `}
+            </Script>
           </div>
         </div>
       </div>

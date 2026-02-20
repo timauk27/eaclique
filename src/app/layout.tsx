@@ -84,9 +84,7 @@ export default function RootLayout({
         `}
       >
         <ThemeProvider>
-          {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
-            <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
-          )}
+          <GoogleAnalytics measurementId="G-ETDNPWYZ6L" />
           <MegaHeader />
           {children}
           <Footer />

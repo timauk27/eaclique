@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { permanentRedirect } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { Calendar, TrendingUp } from 'lucide-react'
@@ -175,7 +175,7 @@ export default async function CategoryPage({ params }: PageProps) {
     }
 
     if (!dbCategoryName) {
-        notFound()
+        permanentRedirect('/')
     }
 
     // 2. Fetch Subcategories (if we have an ID)

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { permanentRedirect } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import ShareBar from '@/components/ShareBar'
 import AmazonProductCard from '@/components/AmazonProductCard'
@@ -192,7 +192,7 @@ export default async function NewsPage({ params }: PageProps) {
     const news = await getNewsData(slug)
 
     if (!news) {
-        notFound()
+        permanentRedirect('/')
     }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://eaclique.com.br'

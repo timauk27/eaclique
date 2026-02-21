@@ -61,6 +61,17 @@ export default async function StaticPage({ params }: PageProps) {
     const page = await getPageData(slug)
 
     if (!page) {
+        const { data: redir } = await supabase
+            .from('redirecionamentos')
+            .select('destino_url')
+            .eq('origem_slug', `/pagina/${slug}`)
+            .eq('ativo', true)
+            .single()
+
+        if (redir && redir.destino_url) {
+            permanentRedirect(redir.destino_url)
+        }
+
         permanentRedirect('/404')
     }
 

@@ -18,7 +18,8 @@ import {
     Users,
     BookOpen,
     List,
-    Route
+    Route,
+    CalendarDays
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -31,6 +32,7 @@ interface AdminLayoutProps {
 const menuItems = [
     { href: '/admin/dashboard', label: 'Visão Geral', icon: LayoutDashboard },
     { href: '/admin/dashboard/noticias', label: 'Notícias', icon: FileText },
+    { href: '/admin/dashboard/calendario', label: 'Calendário', icon: CalendarDays },
     { href: '/admin/dashboard/paginas', label: 'Páginas Fixas', icon: BookOpen },
     { href: '/admin/dashboard/menus', label: 'Menus', icon: List },
     { href: '/admin/dashboard/missoes', label: 'Missões Robô', icon: Target },

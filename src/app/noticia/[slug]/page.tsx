@@ -4,10 +4,10 @@ import { permanentRedirect } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import ShareBar from '@/components/ShareBar'
 import AmazonProductCard from '@/components/AmazonProductCard'
-import AdInArticle from '@/components/ads/AdInArticle'
 import AdBillboard from '@/components/ads/AdBillboard'
 import AdSkyscraper from '@/components/ads/AdSkyscraper'
 import AdStickyFooter from '@/components/ads/AdStickyFooter'
+import AdManager from '@/components/ads/AdManager'
 import NewsSidebar from '@/components/NewsSidebar'
 import RelatedArticles from '@/components/RelatedArticles'
 import { NewsArticleSchema, BreadcrumbSchema } from '@/components/seo/StructuredData'
@@ -101,15 +101,41 @@ function parseContentWithAds(
     productName?: string
 ) {
     // Limpa crases de markdown (```html) que a IA pode ter inserido no JSON
-    const cleanHtml = htmlContent.replace(/```html/gi, '').replace(/```/g, '').trim();
+    let cleanHtml = htmlContent.replace(/```html/gi, '').replace(/```/g, '').trim();
+
+    // Lógica para injetar anúncio 300x250 no meio do conteúdo:
+    // Quebra o HTML pelos fechamentos de parágrafo </p>
+    const paragraphs = cleanHtml.split('</p>');
+    const elements: React.ReactNode[] = [];
+
+    paragraphs.forEach((p, index) => {
+        // Ignora partes vazias residuais
+        if (!p.trim()) return;
+
+        // Reconstrói o parágrafo (já que o split removeu o </p>)
+        const fullParagraphHtml = p + '</p>';
+
+        elements.push(
+            <div
+                key={`p-${index}`}
+                className="prose prose-lg prose-slate max-w-none conteudo-noticia mb-4"
+                dangerouslySetInnerHTML={{ __html: fullParagraphHtml }}
+            />
+        );
+
+        // Injeta o AdManager após o 2º parágrafo (índice 1)
+        if (index === 1) {
+            elements.push(
+                <div key="ad-in-article" className="my-8 flex justify-center w-full">
+                    <AdManager posicao="Banner 300x250" />
+                </div>
+            );
+        }
+    });
 
     return (
         <div className="w-full">
-            {/* Renderização principal equivalente ao set:html / dangerouslySetInnerHTML */}
-            <div
-                className="prose prose-lg prose-slate max-w-none conteudo-noticia"
-                dangerouslySetInnerHTML={{ __html: cleanHtml }}
-            />
+            {elements}
 
             {/* Renderiza o card da Amazon no final do artigo, já que removemos o injetor frágil de parágrafos */}
             {affiliateLink && productName && (
@@ -183,8 +209,10 @@ export default async function NewsPage({ params }: PageProps) {
 
             <div className="min-h-screen bg-white">
                 <div className="max-w-7xl mx-auto px-4 py-8">
-                    {/* Billboard Ad */}
-                    <AdBillboard />
+                    {/* Banner Topo */}
+                    <div className="flex justify-center w-full mb-8">
+                        <AdManager posicao="Banner 728x90" />
+                    </div>
 
                     {/* Breadcrumbs */}
                     <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6">

@@ -60,6 +60,7 @@ import { Footer } from "@/components/Footer";
 import CookieBanner from "@/components/CookieBanner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import AdManager from "@/components/ads/AdManager";
 
 export default function RootLayout({
   children,
@@ -113,6 +114,7 @@ export default function RootLayout({
           <Footer />
           <ThemeSwitcher />
           <CookieBanner />
+          <AdManager posicao="Social Bar" />
         </ThemeProvider>
       </body>
     </html>

@@ -1,5 +1,6 @@
 @import "../styles/themes/themes.css";
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: var(--bg-page);
@@ -12,7 +13,7 @@
 
   --font-heading: var(--font-montserrat);
   --font-body: var(--font-nunito);
-  
+
   --font-sans: var(--font-heading);
   --font-mono: var(--font-geist-mono);
 

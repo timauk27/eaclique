@@ -100,77 +100,28 @@ function parseContentWithAds(
     affiliateLink?: string,
     productName?: string
 ) {
-    // Parse HTML to extract paragraphs
-    const paragraphRegex = /<p[^>]*>.*?<\/p>/gs
-    const paragraphs = htmlContent.match(paragraphRegex) || []
+    // Limpa crases de markdown (```html) que a IA pode ter inserido no JSON
+    const cleanHtml = htmlContent.replace(/```html/gi, '').replace(/```/g, '').trim();
 
-    const elements: React.ReactElement[] = []
-    let paragraphCount = 0
-    let amazonCardInserted = false
+    return (
+        <div className="w-full">
+            {/* Renderização principal equivalente ao set:html / dangerouslySetInnerHTML */}
+            <div
+                className="prose prose-lg prose-slate max-w-none conteudo-noticia"
+                dangerouslySetInnerHTML={{ __html: cleanHtml }}
+            />
 
-    // Get non-paragraph content (headings, lists, etc.)
-    let remainingContent = htmlContent
-
-    paragraphs.forEach((paragraph, index) => {
-        // Add content before this paragraph
-        const beforeIndex = remainingContent.indexOf(paragraph)
-        if (beforeIndex > 0) {
-            const beforeContent = remainingContent.substring(0, beforeIndex)
-            if (beforeContent.trim()) {
-                elements.push(
-                    <div
-                        key={`before-${index}`}
-                        dangerouslySetInnerHTML={{ __html: beforeContent }}
-                        className="prose prose-lg prose-slate max-w-none"
+            {/* Renderiza o card da Amazon no final do artigo, já que removemos o injetor frágil de parágrafos */}
+            {affiliateLink && productName && (
+                <div className="mt-8 border-t pt-8">
+                    <AmazonProductCard
+                        productName={productName}
+                        affiliateLink={affiliateLink}
                     />
-                )
-            }
-        }
-
-        // Add the paragraph
-        elements.push(
-            <div
-                key={`p-${index}`}
-                dangerouslySetInnerHTML={{ __html: paragraph }}
-                className="prose prose-lg prose-slate max-w-none"
-            />
-        )
-
-        paragraphCount++
-
-        // Insert Amazon card after 2nd paragraph
-        if (paragraphCount === 2 && !amazonCardInserted && affiliateLink && productName) {
-            elements.push(
-                <AmazonProductCard
-                    key="amazon-card"
-                    productName={productName}
-                    affiliateLink={affiliateLink}
-                />
-            )
-            amazonCardInserted = true
-        }
-
-        // Insert ad every 3 paragraphs
-        if (paragraphCount % 3 === 0) {
-            elements.push(<AdInArticle key={`ad-${paragraphCount}`} />)
-        }
-
-        // Update remaining content
-        remainingContent = remainingContent.substring(beforeIndex + paragraph.length)
-    })
-
-    // Add any remaining content
-    if (remainingContent.trim()) {
-        elements.push(
-            <div
-                key="remaining"
-                dangerouslySetInnerHTML={{ __html: remainingContent }}
-                className="prose prose-lg prose-slate max-w-none"
-            />
-        )
-    }
-
-    return elements
+                </div>
+            )}
+        </div>
+    );
 }
 
 // Helper to slugify category names
@@ -316,23 +267,6 @@ export default async function NewsPage({ params }: PageProps) {
                             <div className="space-y-4">
                                 {contentElements}
                             </div>
-
-                            {/* Source Attribution */}
-                            {news.fonte_original && (
-                                <div className="mt-8 pt-6 border-t border-slate-200">
-                                    <p className="text-sm text-slate-500">
-                                        Fonte original:{' '}
-                                        <a
-                                            href={news.fonte_original}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline"
-                                        >
-                                            {new URL(news.fonte_original).hostname}
-                                        </a>
-                                    </p>
-                                </div>
-                            )}
 
                             {/* Related Articles */}
                             <RelatedArticles currentNewsId={news.id} currentCategory={news.categoria} />

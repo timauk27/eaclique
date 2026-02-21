@@ -1,12 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { useAdScript } from '@/hooks/useAdScript';
 
 export default function AdStickyFooter() {
     const [isVisible, setIsVisible] = useState(true);
     const script = useAdScript('footer_sticky');
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!script || !containerRef.current) return;
+        containerRef.current.innerHTML = '';
+        try {
+            const fragment = document.createRange().createContextualFragment(script);
+            containerRef.current.appendChild(fragment);
+        } catch (error) {
+            console.error('Erro injetando anúncio footer_sticky:', error);
+        }
+    }, [script]);
 
     if (!isVisible || !script) {
         return null;
@@ -22,7 +34,7 @@ export default function AdStickyFooter() {
                 >
                     <X className="h-4 w-4" />
                 </button>
-                <div dangerouslySetInnerHTML={{ __html: script }} />
+                <div ref={containerRef} />
             </div>
         </div>
     );

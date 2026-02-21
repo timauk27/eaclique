@@ -103,6 +103,10 @@ function parseContentWithAds(
     // Limpa crases de markdown (```html) que a IA pode ter inserido no JSON
     let cleanHtml = htmlContent.replace(/```html/gi, '').replace(/```/g, '').trim();
 
+    // Filtro para ocultar qualquer "Fonte original: [link]" que a IA tenha inserido no texto final
+    cleanHtml = cleanHtml.replace(/<p[^>]*>[\s\n]*((<[^>]+>)*)[\s]*Fonte\s*(original)?\s*:.*?<\/p>/gi, '');
+    cleanHtml = cleanHtml.replace(/[\s]*((<[^>]+>)*)[\s]*Fonte\s*(original)?\s*:.*?(\n|$)/gi, '');
+
     // Lógica para injetar anúncio 300x250 no meio do conteúdo:
     // Quebra o HTML pelos fechamentos de parágrafo </p>
     const paragraphs = cleanHtml.split('</p>');

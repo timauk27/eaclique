@@ -192,6 +192,18 @@ export default async function NewsPage({ params }: PageProps) {
     const news = await getNewsData(slug)
 
     if (!news) {
+        // Verifica se existe um redirecionamento (301) configurado para essa URL antiga
+        const { data: redir } = await supabase
+            .from('redirecionamentos')
+            .select('destino_url')
+            .eq('origem_slug', `/noticia/${slug}`)
+            .eq('ativo', true)
+            .single()
+
+        if (redir && redir.destino_url) {
+            permanentRedirect(redir.destino_url)
+        }
+
         permanentRedirect('/')
     }
 

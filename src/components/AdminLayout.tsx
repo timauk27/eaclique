@@ -17,7 +17,8 @@ import {
     Target,
     Users,
     BookOpen,
-    List
+    List,
+    Route
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -39,6 +40,7 @@ const menuItems = [
     { href: '/admin/dashboard/afiliados', label: 'Afiliados', icon: DollarSign },
     { href: '/admin/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
     { href: '/admin/dashboard/seo', label: 'SEO Check', icon: AlertTriangle },
+    { href: '/admin/dashboard/redirecionamentos', label: 'Redirecionamentos', icon: Route },
     { href: '/admin/dashboard/ads', label: 'Anúncios', icon: Megaphone },
 ]
 

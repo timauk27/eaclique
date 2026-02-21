@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { Calendar, TrendingUp } from 'lucide-react'
 import AdBillboard from '@/components/ads/AdBillboard'
+import HighlightStrip from '@/components/HighlightStrip'
 
 interface PageProps {
     params: Promise<{ categoria: string }>
@@ -218,6 +219,22 @@ export default async function CategoryPage({ params }: PageProps) {
     const titleCategory = dbCategoryName
     const categoryColor = categoryColors[titleCategory.toUpperCase()] || categoryColors[Object.keys(categoryColors).find(k => titleCategory.toUpperCase().includes(k)) || ''] || 'bg-slate-600'
 
+    // Map tailwind bg class to colorTheme for HighlightStrip
+    const getThemeColor = (bgClass: string) => {
+        if (bgClass.includes('red')) return 'red';
+        if (bgClass.includes('green')) return 'green';
+        if (bgClass.includes('pink')) return 'pink';
+        if (bgClass.includes('yellow')) return 'yellow';
+        if (bgClass.includes('cyan')) return 'cyan';
+        if (bgClass.includes('purple')) return 'purple';
+        if (bgClass.includes('teal')) return 'teal';
+        if (bgClass.includes('blue')) return 'blue';
+        if (bgClass.includes('gray')) return 'gray';
+        if (bgClass.includes('indigo')) return 'purple';
+        return 'blue';
+    };
+    const themeColor = getThemeColor(categoryColor);
+
     return (
         <div className="min-h-screen bg-white">
             <div className="max-w-7xl mx-auto px-4 py-8">
@@ -237,6 +254,18 @@ export default async function CategoryPage({ params }: PageProps) {
                     </h1>
                 </div>
 
+                {/* Highlight Strip for this category */}
+                {news.length > 0 && (
+                    <div className="mb-12">
+                        <HighlightStrip
+                            title={`Destaques - ${titleCategory}`}
+                            watermark={titleCategory.split(' ')[0]}
+                            posts={news.slice(0, 5)}
+                            colorTheme={themeColor as any}
+                        />
+                    </div>
+                )}
+
                 {/* News Grid */}
                 {news.length === 0 ? (
                     <div className="text-center py-16">
@@ -253,10 +282,13 @@ export default async function CategoryPage({ params }: PageProps) {
                 ) : (
                     <div className="space-y-8">
                         {(() => {
+                            const gridNews = news.slice(5); // Skip the first 5 shown in the HighlightStrip
+                            if (gridNews.length === 0) return null;
+
                             const elements = [];
-                            for (let i = 0; i < news.length; i += 6) {
+                            for (let i = 0; i < gridNews.length; i += 6) {
                                 // Add a batch of up to 6 news items
-                                const batch = news.slice(i, i + 6);
+                                const batch = gridNews.slice(i, i + 6);
                                 elements.push(
                                     <div key={`batch-${i}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {batch.map((article) => (
@@ -308,7 +340,7 @@ export default async function CategoryPage({ params }: PageProps) {
                                 );
 
                                 // Add banner after every 6 items (but not after the last batch)
-                                if (i + 6 < news.length) {
+                                if (i + 6 < gridNews.length) {
                                     elements.push(
                                         <div key={`ad-${i}`} className="w-full flex justify-center py-4">
                                             <AdBillboard />

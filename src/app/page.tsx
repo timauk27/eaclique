@@ -9,6 +9,7 @@ import Script from 'next/script';
 import AdBillboard from '@/components/ads/AdBillboard';
 import AdSkyscraper from '@/components/ads/AdSkyscraper';
 import { headers } from 'next/headers';
+import HighlightStrip from '@/components/HighlightStrip';
 
 export const metadata: Metadata = {
   title: 'EAClique - O Seu Portal de Notícias',
@@ -39,7 +40,7 @@ async function getData() {
 
   let query = supabase
     .from("noticias")
-    .select("id, titulo_viral, slug, categoria, imagem_capa, resumo_seo, created_at, views_reais")
+    .select("id, titulo_viral, slug, categoria, subcategoria, imagem_capa, resumo_seo, created_at, views_reais")
     .order("created_at", { ascending: false })
     .limit(1000);
 
@@ -288,60 +289,13 @@ export default async function Home() {
         </section>
 
         {/* 4. ARENA ESPORTIVA (Visual Strip) */}
-        <section className="mb-12 bg-gray-900 text-gray-100 p-6 -mx-4 md:mx-0 rounded-2xl relative overflow-hidden">
-          {/* Background Pattern or Gradient */}
-          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-            <h1 className="text-9xl font-black text-white">ARENA</h1>
-          </div>
-
-          <div className="relative z-10">
-            <div className="flex justify-between items-end mb-6 border-b border-gray-700 pb-4">
-              <div className="flex flex-col gap-2">
-                <h2 className="text-3xl font-black uppercase text-green-400 tracking-tighter">Arena Esportiva</h2>
-                <div className="flex gap-2">
-                  {getSubcategories(arenaPosts).map(sub => (
-                    <span key={sub} className="px-2 py-0.5 rounded-full border border-gray-600 text-[10px] uppercase hover:bg-green-500 hover:text-black hover:border-green-500 cursor-pointer transition-colors">
-                      {sub}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <Link href="/category/esportes" className="text-sm font-bold text-gray-400 hover:text-white transition-colors">Ver tudo &rarr;</Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {/* Hero do Esporte */}
-              <div className="md:col-span-2">
-                {arenaPosts[0] && (
-                  <Link href={`/noticia/${arenaPosts[0].slug}`} className="group block relative h-full min-h-[300px] rounded-lg overflow-hidden">
-                    {arenaPosts[0].imagem_capa && <img src={arenaPosts[0].imagem_capa} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60" />}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
-                    <div className="absolute bottom-0 p-6">
-                      <span className="bg-green-500 text-black text-xs font-black uppercase px-2 py-1 rounded-sm mb-2 inline-block">{arenaPosts[0].subcategoria || "Destaque"}</span>
-                      <h3 className="text-2xl font-bold text-white leading-tight group-hover:underline">{arenaPosts[0].titulo_viral}</h3>
-                    </div>
-                  </Link>
-                )}
-                {!arenaPosts[0] && <div className="h-full bg-gray-800 rounded-lg flex items-center justify-center text-gray-500">Sem destaque</div>}
-              </div>
-
-              {/* Lista Lateral Esporte */}
-              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {arenaPosts.slice(1, 5).map((post, idx) => (
-                  <Link key={idx} href={`/noticia/${post.slug}`} className="group block bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-700 transition-colors">
-                    <div className="h-32 overflow-hidden relative">
-                      {post.imagem_capa ? <img src={post.imagem_capa} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gray-700" />}
-                    </div>
-                    <div className="p-3">
-                      <span className="text-[10px] text-green-400 font-bold uppercase">{post.subcategoria || "Geral"}</span>
-                      <h4 className="text-sm font-bold text-gray-200 leading-snug line-clamp-2 mt-1">{post.titulo_viral}</h4>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <HighlightStrip
+          title="Arena Esportiva"
+          watermark="ARENA"
+          posts={arenaPosts}
+          colorTheme="green"
+          seeAllLink="/category/esportes"
+        />
 
         {/* 5. DUAL SECTION: TECH & GAMES */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
@@ -432,6 +386,14 @@ export default async function Home() {
             </div>
           </div>
         </div>
+
+        {/* 8. ÚLTIMAS NOTÍCIAS (Visual Strip) */}
+        <HighlightStrip
+          title="Últimas Notícias"
+          watermark="ÚLTIMAS"
+          posts={posts.slice(0, 5)}
+          colorTheme="blue"
+        />
 
       </div>
     </main>

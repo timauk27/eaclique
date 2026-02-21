@@ -6,45 +6,29 @@ import { DynamicHeader } from "./DynamicHeader";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 
-type Category = {
+type MenuLink = {
     id: string;
     nome: string;
-    slug: string;
-    parent_id: string | null;
-    children?: Category[];
+    link_url: string;
+    ordem: number;
 }
 
 export function MegaHeader() {
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [menus, setMenus] = useState<MenuLink[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchMenus = async () => {
             const supabase = createClient();
-            const { data } = await supabase.from('categorias').select('*').eq('ativo', true).order('nome');
+            const { data } = await supabase.from('menus').select('*').eq('ativo', true).order('ordem');
 
             if (data) {
-                const map: Record<string, Category> = {};
-                const roots: Category[] = [];
-
-                data.forEach(cat => {
-                    map[cat.id] = { ...cat, children: [] };
-                });
-
-                data.forEach(cat => {
-                    if (cat.parent_id && map[cat.parent_id]) {
-                        map[cat.parent_id].children?.push(map[cat.id]);
-                    } else {
-                        roots.push(map[cat.id]);
-                    }
-                });
-
-                setCategories(roots);
+                setMenus(data);
             }
             setLoading(false);
         };
 
-        fetchCategories();
+        fetchMenus();
     }, []);
 
     return (
@@ -76,8 +60,10 @@ export function MegaHeader() {
                     <ul className="flex justify-center items-center flex-wrap gap-6 py-2">
                         {loading ? (
                             <li className="text-sm text-gray-400 animate-pulse">Carregando menu...</li>
-                        ) : categories.map((cat) => (
-                            <MenuItem key={cat.id} category={cat} />
+                        ) : menus.length === 0 ? (
+                            <li className="text-sm text-gray-400">Nenhum menu configurado</li>
+                        ) : menus.map((menu) => (
+                            <MenuItem key={menu.id} menu={menu} />
                         ))}
                     </ul>
                 </div>
@@ -86,35 +72,15 @@ export function MegaHeader() {
     );
 }
 
-function MenuItem({ category }: { category: Category }) {
-    const hasChildren = category.children && category.children.length > 0;
-
+function MenuItem({ menu }: { menu: MenuLink }) {
     return (
         <li className="group relative">
             <Link
-                href={`/category/${category.slug}`}
-                className={`text-sm font-black uppercase tracking-widest px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 rounded-md hover:text-blue-700 flex items-center gap-1`}
+                href={menu.link_url}
+                className="text-sm font-black uppercase tracking-widest px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 rounded-md hover:text-blue-700 flex items-center gap-1"
             >
-                {category.nome}
-                {hasChildren && <ChevronDown className="w-3 h-3 text-gray-400 group-hover:text-blue-700" />}
+                {menu.nome}
             </Link>
-
-            {/* DROPDOWN */}
-            {hasChildren && (
-                <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 min-w-[200px]">
-                    <div className="bg-white border border-gray-100 shadow-xl rounded-lg overflow-hidden py-1">
-                        {category.children?.map(child => (
-                            <Link
-                                key={child.id}
-                                href={`/category/${child.slug}`}
-                                className="block px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-blue-700 uppercase tracking-wide border-l-2 border-transparent hover:border-blue-700"
-                            >
-                                {child.nome}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
         </li>
     );
 }

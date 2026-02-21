@@ -34,17 +34,36 @@ const categoryColors: Record<string, string> = {
 
 // Fetch news data
 async function getNewsData(slug: string) {
+    // Attempt to fetch with the `autores` relation (if the DB migration was run)
     const { data, error } = await supabase
         .from('noticias')
-        .select('*')
+        .select(`
+            *,
+            autores (
+                id,
+                nome,
+                foto_url,
+                biografia,
+                rede_social_link
+            )
+        `)
         .eq('slug', slug)
         .single()
 
-    if (error || !data) {
-        return null
+    if (error) {
+        // Fallback to basic fetch if relation doesn't exist yet
+        const fallback = await supabase
+            .from('noticias')
+            .select('*')
+            .eq('slug', slug)
+            .single()
+
+        if (fallback.error || !fallback.data) return null;
+        return fallback.data;
     }
 
-    return data
+    if (!data) return null;
+    return data;
 }
 
 // Generate metadata for SEO and social sharing
@@ -275,7 +294,7 @@ export default async function NewsPage({ params }: PageProps) {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <User className="h-4 w-4" />
-                                    <span>Redação EAClique</span>
+                                    <span>{news.autores?.nome || 'Redação EAClique'}</span>
                                 </div>
                             </div>
 
@@ -299,6 +318,31 @@ export default async function NewsPage({ params }: PageProps) {
                             <div className="space-y-4">
                                 {contentElements}
                             </div>
+
+                            {/* Author Bio Box */}
+                            {news.autores && (
+                                <div className="mt-10 mb-8 p-6 bg-slate-50 border border-slate-200 rounded-xl flex flex-col md:flex-row gap-6 items-center md:items-start">
+                                    {news.autores.foto_url ? (
+                                        <img src={news.autores.foto_url} alt={news.autores.nome} className="w-20 h-20 rounded-full object-cover shadow-sm border border-slate-200" />
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-slate-400 flex-shrink-0">
+                                            <User className="w-10 h-10" />
+                                        </div>
+                                    )}
+                                    <div className="text-center md:text-left">
+                                        <h3 className="text-lg font-bold text-slate-900">{news.autores.nome}</h3>
+                                        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-2">Autor</p>
+                                        {news.autores.biografia && (
+                                            <p className="text-sm text-slate-600 leading-relaxed">{news.autores.biografia}</p>
+                                        )}
+                                        {news.autores.rede_social_link && (
+                                            <a href={news.autores.rede_social_link} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors mt-3 inline-block">
+                                                Acompanhar Autor &rarr;
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Related Articles */}
                             <RelatedArticles currentNewsId={news.id} currentCategory={news.categoria} />

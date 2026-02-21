@@ -35,7 +35,8 @@ export default function AdminEditorPage() {
     // Form state
     const [formData, setFormData] = useState({
         titulo_viral: '',
-        categoria: 'BRASIL',
+        categoria_id: '',
+        autor_id: '',
         conteudo_html: '',
         imagem_capa: '',
         resumo_seo: '',
@@ -43,7 +44,38 @@ export default function AdminEditorPage() {
         agendado_para: ''
     })
 
-    const categorias = ['PLANTÃO', 'BRASIL', 'MUNDO', 'ARENA', 'HOLOFOTE', 'PIXEL', 'PLAY', 'VITAL', 'MERCADO']
+    const [categorias, setCategorias] = useState<any[]>([])
+    const [autores, setAutores] = useState<any[]>([])
+
+    const loadAutores = async () => {
+        const { data } = await supabase.from('autores').select('id, nome').order('nome', { ascending: true })
+        if (data) setAutores(data)
+    }
+
+    const loadCategorias = async () => {
+        const { data, error } = await supabase.from('categorias').select('id, nome, parent_id');
+        if (data && !error) {
+            // Build a flat list with parent names for better UX
+            const map = new Map();
+            data.forEach(c => map.set(c.id, c));
+            const enriched = data.map(c => {
+                let displayName = c.nome;
+                let parentName = null;
+                if (c.parent_id && map.has(c.parent_id)) {
+                    parentName = map.get(c.parent_id).nome;
+                    displayName = `${parentName} > ${c.nome}`;
+                }
+                return { ...c, displayName, parentName };
+            }).sort((a, b) => a.displayName.localeCompare(b.displayName));
+            setCategorias(enriched);
+        }
+    }
+
+    useEffect(() => {
+        loadCategorias();
+        loadAutores();
+        loadNoticias();
+    }, [])
 
     // SEO Analysis Logic
     const seoAnalysis = useMemo(() => {
@@ -95,7 +127,7 @@ export default function AdminEditorPage() {
         setLoading(true)
         const { data, error } = await supabase
             .from('noticias')
-            .select('id, titulo_viral, categoria, conteudo_html, imagem_capa, resumo_seo, slug, created_at, status, agendado_para')
+            .select('id, titulo_viral, categoria, categoria_id, autor_id, conteudo_html, imagem_capa, resumo_seo, slug, created_at, status, agendado_para')
             .order('created_at', { ascending: false })
             .limit(20)
 
@@ -104,10 +136,6 @@ export default function AdminEditorPage() {
         }
         setLoading(false)
     }
-
-    useEffect(() => {
-        loadNoticias()
-    }, [])
 
     useEffect(() => {
         if (idToEdit) {
@@ -127,29 +155,38 @@ export default function AdminEditorPage() {
         }
     }, [idToEdit])
 
-    const startEdit = (noticia: Noticia) => {
+    const startEdit = (noticia: any) => {
         setEditingId(noticia.id)
         setFormData({
             titulo_viral: noticia.titulo_viral || '',
-            categoria: noticia.categoria || 'BRASIL',
+            categoria_id: noticia.categoria_id || '',
+            autor_id: noticia.autor_id || '',
             conteudo_html: noticia.conteudo_html || '',
             imagem_capa: noticia.imagem_capa || '',
             resumo_seo: noticia.resumo_seo || '',
             status: noticia.status || 'rascunho',
             agendado_para: noticia.agendado_para || ''
         })
-        setShowNewForm(false)
+        setShowNewForm(true)
     }
 
     const saveNoticia = async () => {
-        if (!formData.titulo_viral || !formData.conteudo_html) {
-            alert('Título e conteúdo são obrigatórios!')
+        if (!formData.titulo_viral || !formData.conteudo_html || !formData.categoria_id) {
+            alert('Título, categoria e conteúdo são obrigatórios!')
             return
         }
 
+        // Encontrar a categoria selecionada para preencher categoria e subcategoria textuais
+        const selectedCat = categorias.find(c => c.id === formData.categoria_id);
+        const categoriaNome = selectedCat?.parentName || selectedCat?.nome || 'GERAL';
+        const subcategoriaNome = selectedCat?.parent_id ? selectedCat?.nome : null;
+
         const noticiaData = {
             titulo_viral: formData.titulo_viral,
-            categoria: formData.categoria,
+            categoria_id: formData.categoria_id,
+            autor_id: formData.autor_id || null,
+            categoria: categoriaNome,
+            subcategoria: subcategoriaNome,
             conteudo_html: formData.conteudo_html,
             imagem_capa: formData.imagem_capa,
             resumo_seo: formData.resumo_seo,
@@ -169,6 +206,9 @@ export default function AdminEditorPage() {
                 resetForm()
                 loadNoticias()
                 alert('✅ Notícia atualizada!')
+            } else {
+                console.error("Update Error: ", error)
+                alert(`❌ Erro ao atualizar: ${error.message}`)
             }
         } else {
             // Insert
@@ -196,6 +236,9 @@ export default function AdminEditorPage() {
                 resetForm()
                 loadNoticias()
                 alert('✅ Notícia criada!')
+            } else {
+                console.error("Insert Error: ", error)
+                alert(`❌ Erro ao criar: ${error.message}`)
             }
         }
     }
@@ -217,7 +260,8 @@ export default function AdminEditorPage() {
     const resetForm = () => {
         setFormData({
             titulo_viral: '',
-            categoria: 'BRASIL',
+            categoria_id: '',
+            autor_id: '',
             conteudo_html: '',
             imagem_capa: '',
             resumo_seo: '',
@@ -308,19 +352,38 @@ export default function AdminEditorPage() {
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                            Categoria
+                                            Categoria *
                                         </label>
                                         <select
-                                            value={formData.categoria}
-                                            onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                                            value={formData.categoria_id}
+                                            onChange={(e) => setFormData({ ...formData, categoria_id: e.target.value })}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                         >
+                                            <option value="" disabled>Selecione uma categoria</option>
                                             {categorias.map((cat) => (
-                                                <option key={cat} value={cat}>{cat}</option>
+                                                <option key={cat.id} value={cat.id}>{cat.displayName}</option>
                                             ))}
                                         </select>
                                     </div>
 
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                            Autor (Assinatura)
+                                        </label>
+                                        <select
+                                            value={formData.autor_id}
+                                            onChange={(e) => setFormData({ ...formData, autor_id: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        >
+                                            <option value="">Sem autor (Padrão)</option>
+                                            {autores.map((autor) => (
+                                                <option key={autor.id} value={autor.id}>{autor.nome}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-1 gap-4">
                                     <div>
                                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                                             URL da Imagem

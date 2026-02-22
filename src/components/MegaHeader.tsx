@@ -15,24 +15,50 @@ type MenuLink = {
 }
 
 export function MegaHeader() {
-    const [menus, setMenus] = useState<MenuLink[]>([]);
+    const [navItems, setNavItems] = useState<MenuLink[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchMenus = async () => {
+        const fetchNavData = async () => {
             const supabase = createClient();
-            const { data } = await supabase.from('menus').select('*').eq('ativo', true).order('ordem');
 
-            if (data) {
-                setMenus(data);
-            }
+            // 1. Fetch Categorias (A Base do Robô e Notícias)
+            const { data: categories } = await supabase.from('categorias').select('*').eq('ativo', true);
+
+            // 2. Fetch Menus (Links Extras Customizados pelo Admin)
+            const { data: customMenus } = await supabase.from('menus').select('*').eq('ativo', true);
+
+            // Transcrevendo Categorias para a linguagem do Menu
+            const mappedCats: MenuLink[] = (categories || []).map((c: any) => ({
+                id: c.id,
+                nome: c.nome,
+                link_url: `/category/${c.slug}`,
+                parent_id: c.parent_id,
+                ordem: 500 // Ordem 500 garante que as categorias fiquem "no meio" do cabeçalho
+            }));
+
+            // Transcrevendo os Menus explícitos
+            const mappedCustom: MenuLink[] = (customMenus || []).map((m: any) => ({
+                id: m.id,
+                nome: m.nome,
+                link_url: m.link_url,
+                parent_id: m.parent_id,
+                ordem: m.ordem
+            }));
+
+            // Juntando o Melhor dos Dois Mundos na mesma array!
+            setNavItems([...mappedCats, ...mappedCustom]);
             setLoading(false);
         };
 
-        fetchMenus();
+        fetchNavData();
     }, []);
 
-    const parentMenus = menus.filter(m => !m.parent_id);
+    // Criando a raiz do menu. Desempata por ordem numérica, e em caso de empate (todas as categorias tem ordem 500), usa ordem alfabética!
+    const parentMenus = navItems.filter(m => !m.parent_id).sort((a, b) => {
+        if (a.ordem !== b.ordem) return a.ordem - b.ordem;
+        return a.nome.localeCompare(b.nome);
+    });
 
     return (
         <header className="w-full flex flex-col font-sans z-50">
@@ -62,11 +88,11 @@ export function MegaHeader() {
                 <div className="container mx-auto px-4">
                     <ul className="flex justify-center items-center flex-wrap gap-6 py-2">
                         {loading ? (
-                            <li className="text-sm text-gray-400 animate-pulse">Carregando menu...</li>
+                            <li className="text-sm text-gray-400 animate-pulse">Carregando menus e categorias...</li>
                         ) : parentMenus.length === 0 ? (
-                            <li className="text-sm text-gray-400">Nenhum menu raiz configurado. O Menu precisa ser restabelecido no Banco.</li>
+                            <li className="text-sm text-gray-400">Nenhuma categoria ou menu configurado.</li>
                         ) : parentMenus.map((menu) => (
-                            <MenuItem key={menu.id} menu={menu} allMenus={menus} />
+                            <MenuItem key={menu.id} menu={menu} allMenus={navItems} />
                         ))}
                     </ul>
                 </div>
@@ -76,7 +102,11 @@ export function MegaHeader() {
 }
 
 function MenuItem({ menu, allMenus }: { menu: MenuLink, allMenus: MenuLink[] }) {
-    const children = allMenus.filter(m => m.parent_id === menu.id).sort((a, b) => a.ordem - b.ordem);
+    // Busca os filhos DESTE menu especificamente. Usa o mesmo critério de desempate alfabético.
+    const children = allMenus.filter(m => m.parent_id === menu.id).sort((a, b) => {
+        if (a.ordem !== b.ordem) return a.ordem - b.ordem;
+        return a.nome.localeCompare(b.nome);
+    });
     const hasChildren = children.length > 0;
 
     return (

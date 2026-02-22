@@ -115,6 +115,7 @@ export default function RootLayout({
           <ThemeSwitcher />
           <CookieBanner />
           <AdManager posicao="Social Bar" />
+          <AdManager posicao="Popunder" />
         </ThemeProvider>
       </body>
     </html>

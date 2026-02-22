@@ -19,6 +19,8 @@ const POSICOES_DISPONIVEIS = [
     { value: 'skyscraper', label: 'Skyscraper (Lateral)', description: 'Banner vertical na barra lateral que acompanha a rolagem (160x600 ou 300x600).' },
     { value: 'in_article', label: 'Dentro do Artigo', description: 'Aparece automaticamente a cada 3 parágrafos dentro das notícias.' },
     { value: 'footer_sticky', label: 'Footer Sticky (Mobile)', description: 'Banner fixo no rodapé apenas em dispositivos móveis.' },
+    { value: 'Social Bar', label: 'Social Bar (Adsterra)', description: 'Barra flutuante na parte superior ou inferior para forte engajamento em celulares/desktop.' },
+    { value: 'Popunder', label: 'Popunder (Adsterra)', description: 'Abre uma janela inteira por trás do site principal em qualquer clique aleatório do visitante.' },
 ]
 
 export default function AdminAdsPage() {

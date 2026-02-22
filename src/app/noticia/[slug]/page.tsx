@@ -10,6 +10,7 @@ import AdStickyFooter from '@/components/ads/AdStickyFooter'
 import AdManager from '@/components/ads/AdManager'
 import NewsSidebar from '@/components/NewsSidebar'
 import RelatedArticles from '@/components/RelatedArticles'
+import ShopeeCard from '@/components/ShopeeCard'
 import { NewsArticleSchema, BreadcrumbSchema } from '@/components/seo/StructuredData'
 import { ChevronRight, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
@@ -113,6 +114,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 }
 
+// Fetch Shopee Catalog (Contextual or Default Fallback)
+async function getShopeeProduct(category: string) {
+    // 1. Tenta achar ativo pela categoria do leitor
+    let { data: product } = await supabase
+        .from('produtos_shopee') // usando o nome em lower case por seguranca em requests rest
+        .select('*')
+        .eq('ativo', true)
+        .ilike('categoria_alvo', category)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+    // 2. Fallback: Se não achou na categoria, pega o ultimo produto generico ativo
+    if (!product) {
+        const { data: fallbackProduct } = await supabase
+            .from('produtos_shopee')
+            .select('*')
+            .eq('ativo', true)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        product = fallbackProduct;
+    }
+
+    return product || null;
+}
+
 // Fetch single related news for inline injection
 async function getInlineRelatedNews(slugToExclude: string, category: string) {
     const { data } = await supabase
@@ -127,12 +156,13 @@ async function getInlineRelatedNews(slugToExclude: string, category: string) {
     return data || null;
 }
 
-// Parse HTML and inject ads + Amazon card + Inline Related Article
+// Parse HTML and inject ads + Amazon card + Inline Related Article + Shopee Hub
 function parseContentWithAds(
     htmlContent: string,
     affiliateLink?: string,
     productName?: string,
-    inlineRelatedArticle?: { titulo_viral: string, slug: string } | null
+    inlineRelatedArticle?: { titulo_viral: string, slug: string } | null,
+    shopeeProduct?: any | null
 ) {
     // Limpa crases de markdown (```html) que a IA pode ter inserido no JSON
     let cleanHtml = htmlContent.replace(/```html/gi, '').replace(/```/g, '').trim();
@@ -161,7 +191,7 @@ function parseContentWithAds(
             />
         );
 
-        // Injeta o AdManager após o 2º parágrafo (índice 1)
+        // Injeta o AdManager após o 2º parágrafo lido (índice 1)
         if (index === 1) {
             elements.push(
                 <div key="ad-in-article" className="my-8 flex justify-center w-full">
@@ -186,6 +216,20 @@ function parseContentWithAds(
                         {inlineRelatedArticle.titulo_viral}
                     </Link>
                 </aside>
+            );
+        }
+
+        // Injeta o Componente Shopee Premium após o 5º Parágrafo (índice 4)
+        if (index === 4 && shopeeProduct) {
+            elements.push(
+                <div key="shopee-showcase" className="w-full flex justify-center my-10">
+                    <ShopeeCard
+                        titulo={shopeeProduct.titulo}
+                        preco={shopeeProduct.preco}
+                        imagem_url={shopeeProduct.imagem_url}
+                        link_afiliado={shopeeProduct.link_afiliado}
+                    />
+                </div>
             );
         }
     });
@@ -250,11 +294,15 @@ export default async function NewsPage({ params }: PageProps) {
     // Fetch the inline related reading
     const inlineRelated = await getInlineRelatedNews(news.slug, news.categoria || 'Geral')
 
+    // Fetch the automated Shopee showcase Item
+    const shopeeItem = await getShopeeProduct(news.categoria || 'Geral')
+
     const contentElements = parseContentWithAds(
         news.conteudo_html,
         news.link_afiliado_gerado,
         news.call_to_action_prod,
-        inlineRelated
+        inlineRelated,
+        shopeeItem
     )
 
     return (

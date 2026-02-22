@@ -113,11 +113,26 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 }
 
-// Parse HTML and inject ads + Amazon card
+// Fetch single related news for inline injection
+async function getInlineRelatedNews(slugToExclude: string, category: string) {
+    const { data } = await supabase
+        .from('noticias')
+        .select('titulo_viral, slug')
+        .eq('categoria', category)
+        .neq('slug', slugToExclude)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+    return data || null;
+}
+
+// Parse HTML and inject ads + Amazon card + Inline Related Article
 function parseContentWithAds(
     htmlContent: string,
     affiliateLink?: string,
-    productName?: string
+    productName?: string,
+    inlineRelatedArticle?: { titulo_viral: string, slug: string } | null
 ) {
     // Limpa crases de markdown (```html) que a IA pode ter inserido no JSON
     let cleanHtml = htmlContent.replace(/```html/gi, '').replace(/```/g, '').trim();
@@ -126,7 +141,7 @@ function parseContentWithAds(
     cleanHtml = cleanHtml.replace(/<p[^>]*>[\s\n]*((<[^>]+>)*)[\s]*Fonte\s*(original)?\s*:.*?<\/p>/gi, '');
     cleanHtml = cleanHtml.replace(/[\s]*((<[^>]+>)*)[\s]*Fonte\s*(original)?\s*:.*?(\n|$)/gi, '');
 
-    // Lógica para injetar anúncio 300x250 no meio do conteúdo:
+    // Lógica para injetar anúncios e links no meio do conteúdo:
     // Quebra o HTML pelos fechamentos de parágrafo </p>
     const paragraphs = cleanHtml.split('</p>');
     const elements: React.ReactNode[] = [];
@@ -152,6 +167,25 @@ function parseContentWithAds(
                 <div key="ad-in-article" className="my-8 flex justify-center w-full">
                     <AdManager posicao="Banner 300x250" />
                 </div>
+            );
+        }
+
+        // Injeta o "Leia Também" após o 3º parágrafo lido (índice 2) se houver matéria
+        if (index === 2 && inlineRelatedArticle) {
+            elements.push(
+                <aside key="read-also-inline" className="my-8 bg-blue-50/80 border-l-4 border-blue-600 p-5 rounded-r-xl shadow-sm transform transition-transform hover:-translate-y-1">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-blue-700 font-bold tracking-widest uppercase text-xs">
+                            🔗 Leia Também
+                        </span>
+                    </div>
+                    <Link
+                        href={`/noticia/${inlineRelatedArticle.slug}`}
+                        className="text-lg md:text-xl font-bold text-slate-800 hover:text-blue-600 transition-colors block leading-snug"
+                    >
+                        {inlineRelatedArticle.titulo_viral}
+                    </Link>
+                </aside>
             );
         }
     });
@@ -213,10 +247,14 @@ export default async function NewsPage({ params }: PageProps) {
     const categoryColor = categoryColors[news.categoria || 'Geral'] || 'bg-slate-600'
     const categorySlug = slugify(news.categoria || 'geral')
 
+    // Fetch the inline related reading
+    const inlineRelated = await getInlineRelatedNews(news.slug, news.categoria || 'Geral')
+
     const contentElements = parseContentWithAds(
         news.conteudo_html,
         news.link_afiliado_gerado,
-        news.call_to_action_prod
+        news.call_to_action_prod,
+        inlineRelated
     )
 
     return (

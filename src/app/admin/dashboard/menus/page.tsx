@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Plus, Edit, Trash2, X, List as ListIcon, Save, MoveUp, MoveDown } from 'lucide-react'
+import { Plus, Edit, Trash2, X, List as ListIcon, Save, MoveUp, MoveDown, CornerDownRight } from 'lucide-react'
 
 interface MenuLink {
     id: string
@@ -10,6 +10,7 @@ interface MenuLink {
     link_url: string
     ordem: number
     ativo: boolean
+    parent_id: string | null
     created_at: string
 }
 
@@ -23,7 +24,8 @@ export default function AdminMenusPage() {
     const [formData, setFormData] = useState({
         nome: '',
         link_url: '',
-        ativo: true
+        ativo: true,
+        parent_id: '' as string | null
     })
 
     const loadMenus = async () => {
@@ -31,7 +33,7 @@ export default function AdminMenusPage() {
         const { data, error } = await supabase
             .from('menus')
             .select('*')
-            .order('ordem', { ascending: true }) // important: ordered by 'ordem'
+            .order('ordem', { ascending: true })
 
         if (!error && data) {
             setMenus(data)
@@ -44,7 +46,7 @@ export default function AdminMenusPage() {
     }, [])
 
     const deleteMenu = async (id: string) => {
-        if (!confirm('Tem certeza que deseja deletar este link do menu principal?')) return
+        if (!confirm('Tem certeza que deseja deletar este link? (Links filhos também serão deletados se existirem)')) return
 
         const { error } = await supabase
             .from('menus')
@@ -68,6 +70,7 @@ export default function AdminMenusPage() {
             nome: formData.nome,
             link_url: formData.link_url,
             ativo: formData.ativo,
+            parent_id: formData.parent_id || null, // Vazio envia Null
             updated_at: new Date().toISOString()
         }
 
@@ -84,8 +87,9 @@ export default function AdminMenusPage() {
                 alert(`Erro ao atualizar: ${error.message}`)
             }
         } else {
-            // nova insercao vai pro final (maior ordem + 1)
-            const nextOrdem = menus.length > 0 ? Math.max(...menus.map(m => m.ordem)) + 1 : 0
+            // Conta apenas os irmaos (mesmo parent) para achar o ultimo
+            const sameLevelMenus = menus.filter(m => m.parent_id === dataToSave.parent_id)
+            const nextOrdem = sameLevelMenus.length > 0 ? Math.max(...sameLevelMenus.map(m => m.ordem)) + 1 : 0
 
             const { error } = await supabase
                 .from('menus')
@@ -100,30 +104,21 @@ export default function AdminMenusPage() {
         }
     }
 
-    const changeOrder = async (index: number, direction: 'up' | 'down') => {
-        if (direction === 'up' && index === 0) return;
-        if (direction === 'down' && index === menus.length - 1) return;
+    const changeOrder = async (menuItem: MenuLink, direction: 'up' | 'down') => {
+        const siblings = menus.filter(m => m.parent_id === menuItem.parent_id).sort((a, b) => a.ordem - b.ordem);
+        const currentIndex = siblings.findIndex(m => m.id === menuItem.id);
 
-        const newMenus = [...menus];
-        const swapIndex = direction === 'up' ? index - 1 : index + 1;
+        if (direction === 'up' && currentIndex === 0) return;
+        if (direction === 'down' && currentIndex === siblings.length - 1) return;
 
-        // Swap ordem values
-        const tempOrdem = newMenus[index].ordem;
-        newMenus[index].ordem = newMenus[swapIndex].ordem;
-        newMenus[swapIndex].ordem = tempOrdem;
+        const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        const siblingToSwap = siblings[swapIndex];
 
-        // Visual update immediately
-        // re-sort based on new order
-        newMenus.sort((a, b) => a.ordem - b.ordem);
-        setMenus(newMenus);
+        // Batch update
+        await supabase.from('menus').update({ ordem: siblingToSwap.ordem }).eq('id', menuItem.id);
+        await supabase.from('menus').update({ ordem: menuItem.ordem }).eq('id', siblingToSwap.id);
 
-        // Batch update to Supabase
-        // Update item 1
-        await supabase.from('menus').update({ ordem: newMenus.find(m => m.id === menus[index].id)?.ordem }).eq('id', menus[index].id);
-        // Update item 2
-        await supabase.from('menus').update({ ordem: newMenus.find(m => m.id === menus[swapIndex].id)?.ordem }).eq('id', menus[swapIndex].id);
-
-        loadMenus(); // reload to ensure consistency
+        loadMenus();
     }
 
     const toggleAtivo = async (menu: MenuLink) => {
@@ -132,7 +127,7 @@ export default function AdminMenusPage() {
     }
 
     const resetForm = () => {
-        setFormData({ nome: '', link_url: '', ativo: true })
+        setFormData({ nome: '', link_url: '', ativo: true, parent_id: null })
         setEditingId(null)
         setShowForm(false)
     }
@@ -142,22 +137,36 @@ export default function AdminMenusPage() {
         setFormData({
             nome: menu.nome || '',
             link_url: menu.link_url || '',
-            ativo: menu.ativo
+            ativo: menu.ativo,
+            parent_id: menu.parent_id || null
         })
         setShowForm(true)
     }
 
+    // Organizando hierarquia visual
+    const parentMenus = menus.filter(m => !m.parent_id).sort((a, b) => a.ordem - b.ordem);
+    const getChildren = (parentId: string) => menus.filter(m => m.parent_id === parentId).sort((a, b) => a.ordem - b.ordem);
+
+    const orderedVisibleMenus: { menu: MenuLink, isChild: boolean, parentLength?: number, index?: number }[] = [];
+    parentMenus.forEach((parent, index) => {
+        orderedVisibleMenus.push({ menu: parent, isChild: false, parentLength: parentMenus.length, index });
+        const children = getChildren(parent.id);
+        children.forEach((child, childIndex) => {
+            orderedVisibleMenus.push({ menu: child, isChild: true, parentLength: children.length, index: childIndex });
+        });
+    });
+
     return (
         <div className="min-h-screen bg-gray-50 p-6">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-5xl mx-auto">
                 <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                             <ListIcon className="w-8 h-8 text-blue-600" />
-                            Gerenciador de Menu Principal
+                            Gerenciador de Dropdowns
                         </h1>
                         <p className="text-gray-600 mt-1">
-                            Controle a barra de navegação superior do seu portal de forma dinâmica.
+                            Controle a barra de navegação superior e os menus e submenus (dropdowns).
                         </p>
                     </div>
                 </div>
@@ -169,42 +178,45 @@ export default function AdminMenusPage() {
                             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
                                 <h2 className="text-lg font-bold text-gray-900">Links do Menu</h2>
                                 <span className="text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
-                                    {menus.length} itens
+                                    {menus.length} itens totais
                                 </span>
                             </div>
 
                             {loading ? (
-                                <div className="p-8 text-center text-gray-500">Carregando...</div>
+                                <div className="p-8 text-center text-gray-500">Carregando listagem...</div>
                             ) : menus.length === 0 ? (
-                                <div className="p-8 text-center text-gray-500">Nenhum link no menu principal.</div>
+                                <div className="p-8 text-center text-gray-500">Nenhum menu configurado no Banco.</div>
                             ) : (
                                 <div className="divide-y divide-gray-100">
-                                    {menus.map((menu, index) => (
-                                        <div key={menu.id} className={`p-4 hover:bg-gray-50 transition flex items-center justify-between gap-4 ${!menu.ativo ? 'opacity-50' : ''}`}>
-                                            <div className="flex flex-col gap-1 w-12 items-center flex-shrink-0">
-                                                <button onClick={() => changeOrder(index, 'up')} disabled={index === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">
+                                    {orderedVisibleMenus.map(({ menu, isChild, parentLength, index }) => (
+                                        <div key={menu.id} className={`p-4 hover:bg-gray-50 transition flex items-center justify-between gap-4 ${!menu.ativo ? 'opacity-50' : ''} ${isChild ? 'bg-slate-50 border-l-4 border-l-blue-400 pl-8' : 'border-l-4 border-l-transparent'}`}>
+
+                                            <div className="flex flex-col gap-1 w-8 items-center flex-shrink-0">
+                                                <button onClick={() => changeOrder(menu, 'up')} disabled={index === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-20 cursor-pointer">
                                                     <MoveUp className="w-4 h-4" />
                                                 </button>
-                                                <span className="text-xs font-bold text-gray-400">{index + 1}</span>
-                                                <button onClick={() => changeOrder(index, 'down')} disabled={index === menus.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">
+                                                <button onClick={() => changeOrder(menu, 'down')} disabled={index === (parentLength ? parentLength - 1 : 0)} className="text-gray-400 hover:text-gray-700 disabled:opacity-20 cursor-pointer">
                                                     <MoveDown className="w-4 h-4" />
                                                 </button>
                                             </div>
 
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
-                                                    {menu.nome}
-                                                    {!menu.ativo && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 rounded uppercase">Inativo</span>}
-                                                </h3>
-                                                <p className="text-sm text-gray-500 truncate font-mono mt-0.5">{menu.link_url}</p>
+                                            <div className="flex-1 min-w-0 flex items-center gap-2">
+                                                {isChild && <CornerDownRight className="w-5 h-5 text-blue-400" />}
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900 text-sm md:text-base flex items-center gap-2">
+                                                        {menu.nome}
+                                                        {!menu.ativo && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 rounded uppercase font-semibold">Inativo</span>}
+                                                    </h3>
+                                                    <p className="text-xs text-gray-500 truncate font-mono mt-0.5">{menu.link_url}</p>
+                                                </div>
                                             </div>
 
                                             <div className="flex items-center gap-1 flex-shrink-0">
                                                 <button
                                                     onClick={() => toggleAtivo(menu)}
-                                                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition ${menu.ativo ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+                                                    className={`px-3 py-1.5 text-[10px] md:text-xs font-bold rounded-lg transition ${menu.ativo ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
                                                 >
-                                                    {menu.ativo ? 'Visível' : 'Oculto'}
+                                                    {menu.ativo ? 'Ativo' : 'Oculto'}
                                                 </button>
                                                 <button onClick={() => startEdit(menu)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Editar">
                                                     <Edit className="w-4 h-4" />
@@ -225,7 +237,7 @@ export default function AdminMenusPage() {
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
                             <div className="flex justify-between items-center border-b pb-4 mb-4">
                                 <h3 className="text-lg font-bold text-gray-900">
-                                    {editingId ? 'Editar Item' : 'Adicionar Item'}
+                                    {editingId ? 'Editar Menu' : 'Novo Menu/Submenu'}
                                 </h3>
                                 {editingId && (
                                     <button onClick={resetForm} className="text-gray-400 hover:text-gray-700">
@@ -236,25 +248,39 @@ export default function AdminMenusPage() {
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nome no Menu</label>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nome</label>
                                     <input
                                         type="text"
-                                        placeholder="Ex: Sobre Nós"
+                                        placeholder="Ex: Contato"
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                                         value={formData.nome}
                                         onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">URL / Link</label>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">URL de Destino</label>
                                     <input
                                         type="text"
-                                        placeholder="Ex: /pagina/sobre-nos"
+                                        placeholder="Ex: /contato"
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none"
                                         value={formData.link_url}
                                         onChange={(e) => setFormData({ ...formData, link_url: e.target.value })}
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">Dica: Use URLs relativas como <code>/category/tecnologia</code> para links internos.</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Menu Pai (Criar Submenu)</label>
+                                    <select
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                        value={formData.parent_id || ''}
+                                        onChange={(e) => setFormData({ ...formData, parent_id: e.target.value === '' ? null : e.target.value })}
+                                    >
+                                        <option value="">Nenhum (Será um Menu Raiz)</option>
+                                        {parentMenus.filter(m => m.id !== editingId).map(m => (
+                                            <option key={m.id} value={m.id}>↳ {m.nome}</option>
+                                        ))}
+                                    </select>
+                                    <p className="text-xs text-gray-500 mt-1">Deixe vazio para aparecer na barra principal.</p>
                                 </div>
 
                                 <div className="pt-2">
@@ -263,7 +289,7 @@ export default function AdminMenusPage() {
                                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition"
                                     >
                                         {editingId ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                                        {editingId ? 'Salvar Edição' : 'Adicionar ao Menu'}
+                                        {editingId ? 'Salvar Edição' : 'Salvar Novo Item'}
                                     </button>
                                 </div>
                             </div>

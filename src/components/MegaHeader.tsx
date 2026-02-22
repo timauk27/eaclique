@@ -10,6 +10,7 @@ type MenuLink = {
     id: string;
     nome: string;
     link_url: string;
+    parent_id?: string | null;
     ordem: number;
 }
 
@@ -30,6 +31,8 @@ export function MegaHeader() {
 
         fetchMenus();
     }, []);
+
+    const parentMenus = menus.filter(m => !m.parent_id);
 
     return (
         <header className="w-full flex flex-col font-sans z-50">
@@ -60,10 +63,10 @@ export function MegaHeader() {
                     <ul className="flex justify-center items-center flex-wrap gap-6 py-2">
                         {loading ? (
                             <li className="text-sm text-gray-400 animate-pulse">Carregando menu...</li>
-                        ) : menus.length === 0 ? (
-                            <li className="text-sm text-gray-400">Nenhum menu configurado</li>
-                        ) : menus.map((menu) => (
-                            <MenuItem key={menu.id} menu={menu} />
+                        ) : parentMenus.length === 0 ? (
+                            <li className="text-sm text-gray-400">Nenhum menu raiz configurado. O Menu precisa ser restabelecido no Banco.</li>
+                        ) : parentMenus.map((menu) => (
+                            <MenuItem key={menu.id} menu={menu} allMenus={menus} />
                         ))}
                     </ul>
                 </div>
@@ -72,7 +75,10 @@ export function MegaHeader() {
     );
 }
 
-function MenuItem({ menu }: { menu: MenuLink }) {
+function MenuItem({ menu, allMenus }: { menu: MenuLink, allMenus: MenuLink[] }) {
+    const children = allMenus.filter(m => m.parent_id === menu.id).sort((a, b) => a.ordem - b.ordem);
+    const hasChildren = children.length > 0;
+
     return (
         <li className="group relative">
             <Link
@@ -80,7 +86,25 @@ function MenuItem({ menu }: { menu: MenuLink }) {
                 className="text-sm font-black uppercase tracking-widest px-3 py-2 text-gray-600 transition-colors hover:bg-gray-50 rounded-md hover:text-blue-700 flex items-center gap-1"
             >
                 {menu.nome}
+                {hasChildren && <ChevronDown className="w-4 h-4 opacity-50 transition-transform group-hover:rotate-180" />}
             </Link>
+
+            {hasChildren && (
+                <div className="absolute top-full left-0 w-56 bg-white border border-gray-100 shadow-2xl rounded-b-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-3 translate-y-2 group-hover:translate-y-0 before:content-[''] before:absolute before:-top-4 before:left-0 before:w-full before:h-4">
+                    <ul className="flex flex-col">
+                        {children.map(child => (
+                            <li key={child.id}>
+                                <Link
+                                    href={child.link_url}
+                                    className="block px-4 py-2 text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                >
+                                    {child.nome}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </li>
     );
 }

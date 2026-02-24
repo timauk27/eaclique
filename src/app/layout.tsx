@@ -52,6 +52,7 @@ export const metadata: Metadata = {
   },
   other: {
     'monetag': '3ab84899d982d84a7cd3a24d6426a4b8',
+    'p:domain_verify': '69ba68c487b051e5d2fd81e78d461097',
   },
 };
 

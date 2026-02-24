@@ -9,28 +9,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'image.pollinations.ai',
+        hostname: '**',
       },
       {
-        protocol: 'https',
-        hostname: '**.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.globo.com',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.uol.com.br',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'wgtritvydqrijiziloqy.supabase.co',
-      },
+        protocol: 'http',
+        hostname: '**',
+      }
     ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

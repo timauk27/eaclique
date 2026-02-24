@@ -76,7 +76,7 @@ export function MegaHeader() {
             {/* MAIN BAR */}
             <div className="bg-white py-4 border-b border-gray-200 sticky top-0 z-40 shadow-sm relative">
                 <div className="container mx-auto px-4 flex items-center justify-center">
-                    <Link href="/" className="text-4xl md:text-5xl font-black tracking-tighter uppercase flex items-center gap-1 hover:opacity-90 transition-opacity">
+                    <Link href="/" aria-label="Voltar para a página inicial" className="text-4xl md:text-5xl font-black tracking-tighter uppercase flex items-center gap-1 hover:opacity-90 transition-opacity">
                         <span className="text-blue-700">EA</span>
                         <span className="font-light text-gray-900">Clique</span>
                     </Link>

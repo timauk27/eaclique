@@ -20,18 +20,22 @@ export function Footer() {
                         </p>
                         <div className="flex gap-3">
                             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer"
+                                aria-label="Acesse nosso Facebook"
                                 className="bg-gray-800 hover:bg-blue-600 p-2 rounded-full transition-colors">
                                 <Facebook className="w-4 h-4" />
                             </a>
                             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"
+                                aria-label="Acesse nosso Twitter"
                                 className="bg-gray-800 hover:bg-sky-500 p-2 rounded-full transition-colors">
                                 <Twitter className="w-4 h-4" />
                             </a>
                             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                                aria-label="Acesse nosso Instagram"
                                 className="bg-gray-800 hover:bg-pink-600 p-2 rounded-full transition-colors">
                                 <Instagram className="w-4 h-4" />
                             </a>
                             <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"
+                                aria-label="Acesse nosso canal no Youtube"
                                 className="bg-gray-800 hover:bg-red-600 p-2 rounded-full transition-colors">
                                 <Youtube className="w-4 h-4" />
                             </a>
@@ -85,9 +89,10 @@ export function Footer() {
                                 <input
                                     type="email"
                                     placeholder="Seu e-mail"
+                                    aria-label="Digite seu e-mail para receber nossa Newsletter"
                                     className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-xs flex-1 focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
-                                <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-xs font-bold transition-colors">
+                                <button aria-label="Inscrever-se na Newsletter" className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-xs font-bold transition-colors">
                                     <Mail className="w-4 h-4" />
                                 </button>
                             </div>

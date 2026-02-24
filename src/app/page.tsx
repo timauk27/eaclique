@@ -5,6 +5,7 @@ import { SectionHeader } from "@/components/Structure";
 import { Clock, TrendingUp, MapPin } from "lucide-react";
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import Script from 'next/script';
 import AdBillboard from '@/components/ads/AdBillboard';
 import AdSkyscraper from '@/components/ads/AdSkyscraper';
@@ -320,7 +321,7 @@ export default async function Home() {
               {gamesPosts.slice(0, 4).map((post, idx) => (
                 <Link key={idx} href={`/noticia/${post.slug}`} className="group block">
                   <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden relative mb-2">
-                    {post.imagem_capa && <img src={post.imagem_capa} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />}
+                    {post.imagem_capa && <Image src={post.imagem_capa} alt={post.titulo_viral} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 50vw, 25vw" />}
                   </div>
                   <h4 className="text-sm font-bold leading-tight group-hover:text-purple-600 transition-colors line-clamp-2">{post.titulo_viral}</h4>
                 </Link>
@@ -336,7 +337,7 @@ export default async function Home() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-1">
             {holofotePosts.slice(0, 6).map((post, idx) => (
               <Link key={idx} href={`/noticia/${post.slug}`} className="group relative aspect-[3/4] bg-gray-200 block overflow-hidden">
-                {post.imagem_capa && <img src={post.imagem_capa} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />}
+                {post.imagem_capa && <Image src={post.imagem_capa} alt={post.titulo_viral} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="(max-width: 768px) 50vw, 16vw" />}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent">
                   <div className="absolute bottom-0 p-3 w-full">
                     <h4 className="text-white text-xs font-bold leading-tight line-clamp-3 group-hover:text-pink-300 transition-colors">{post.titulo_viral}</h4>
@@ -355,8 +356,8 @@ export default async function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-8">
               {unmapped.slice(0, 6).map((post, idx) => (
                 <div key={idx} className="flex gap-4 items-start">
-                  <div className="w-20 h-20 bg-gray-100 rounded-md shrink-0 overflow-hidden">
-                    {post.imagem_capa && <img src={post.imagem_capa} className="w-full h-full object-cover" />}
+                  <div className="w-20 h-20 bg-gray-100 rounded-md shrink-0 overflow-hidden relative">
+                    {post.imagem_capa && <Image src={post.imagem_capa} alt={post.titulo_viral} fill className="object-cover" sizes="80px" />}
                   </div>
                   <div>
                     <span className="text-[10px] bg-gray-200 px-1 rounded text-gray-600 font-bold uppercase">{post.categoria}</span>

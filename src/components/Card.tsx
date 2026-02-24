@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Clock } from "lucide-react";
+import Image from "next/image";
 
 interface CardProps {
     category: string;
@@ -18,10 +19,12 @@ export function FeatureCard({ category, categoryColor, title, image, time, slug,
     return (
         <div className="relative group h-full min-h-[400px] w-full overflow-hidden rounded-xl bg-gray-900 border border-gray-800 shadow-lg">
             {image && (
-                <img
+                <Image
                     src={image}
                     alt={title}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-40"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-40"
                 />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-500" />
@@ -53,7 +56,7 @@ export function CompactCard({ category, categoryColor, title, image, time, slug 
     return (
         <div className="group flex gap-4 items-start border-b border-gray-100 pb-4 mb-4 last:border-0 last:mb-0 last:pb-0 hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-all duration-300">
             <div className="w-32 h-24 bg-gray-100 rounded-lg shrink-0 overflow-hidden relative shadow-sm">
-                {image && <img src={image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />}
+                {image && <Image src={image} alt={title} fill sizes="128px" className="object-cover transition-transform duration-500 group-hover:scale-110" />}
             </div>
             <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-black transition-colors" style={{ color: `var(--color-${categoryColor})` }}>

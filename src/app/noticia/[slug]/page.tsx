@@ -2,7 +2,6 @@ import React from 'react'
 import { Metadata } from 'next'
 import { permanentRedirect } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import ShareBar from '@/components/ShareBar'
 import AmazonProductCard from '@/components/AmazonProductCard'
 import AdBillboard from '@/components/ads/AdBillboard'
 import AdSkyscraper from '@/components/ads/AdSkyscraper'
@@ -12,8 +11,10 @@ import NewsSidebar from '@/components/NewsSidebar'
 import RelatedArticles from '@/components/RelatedArticles'
 import ShopeeCard from '@/components/ShopeeCard'
 import { NewsArticleSchema, BreadcrumbSchema } from '@/components/seo/StructuredData'
+import ShareBar from '@/components/ShareBar'
 import { ChevronRight, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -398,14 +399,17 @@ export default async function NewsPage({ params }: PageProps) {
 
                             {/* Featured Image */}
                             {news.imagem_capa && (
-                                <figure className="mb-8">
-                                    <img
+                                <figure className="mb-8 relative w-full aspect-video rounded-lg overflow-hidden shadow-lg">
+                                    <Image
                                         src={news.imagem_capa}
                                         alt={news.imagem_alt || news.titulo_viral}
-                                        className="w-full h-auto rounded-lg shadow-lg"
+                                        fill
+                                        priority={true}
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        className="object-cover"
                                     />
                                     {news.imagem_alt && (
-                                        <figcaption className="text-sm text-slate-500 mt-2 text-center">
+                                        <figcaption className="text-sm text-slate-500 mt-2 text-center relative z-10 bg-white/80 p-2">
                                             {news.imagem_alt}
                                         </figcaption>
                                     )}

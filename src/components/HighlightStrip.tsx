@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
+import Image from 'next/image';
 
 // Reflete a interface NewsItem mapeada na Home
 interface NewsItem {
@@ -140,7 +141,7 @@ export default function HighlightStrip({
                         {mainPost && (
                             <Link href={`/noticia/${mainPost.slug}`} className="group block relative h-full min-h-[300px] rounded-lg overflow-hidden">
                                 {mainPost.imagem_capa && (
-                                    <img src={mainPost.imagem_capa} alt={mainPost.titulo_viral} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60" />
+                                    <Image src={mainPost.imagem_capa} alt={mainPost.titulo_viral} fill sizes="(max-width: 768px) 100vw, 50vw" className="absolute inset-0 object-cover transition-transform duration-700 group-hover:scale-110 opacity-60" />
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                                 <div className="absolute bottom-0 p-6">
@@ -162,7 +163,7 @@ export default function HighlightStrip({
                             <Link key={idx} href={`/noticia/${post.slug}`} className="group block bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-700 transition-colors">
                                 <div className="h-32 overflow-hidden relative">
                                     {post.imagem_capa ? (
-                                        <img src={post.imagem_capa} alt={post.titulo_viral} className="w-full h-full object-cover" />
+                                        <Image src={post.imagem_capa} alt={post.titulo_viral} fill sizes="(max-width: 768px) 100vw, 25vw" className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-gray-700" />
                                     )}
